@@ -55,4 +55,19 @@ def request_name():
     port = recv_int(server_conn, 2)
 
     print(f"Nome {user_name} está disponível em {host}:{port}")
-    
+
+def on_closing():
+    global window
+    window.destroy()
+
+window = Tk()
+
+ttk.Label(window, text="Nome de usuário: ").pack(side='left')
+
+user_entry = ttk.Entry(window)
+user_entry.pack(side='left')
+
+ttk.Button(window, text="Cadastrar", command=register_name).pack(pady=5)
+ttk.Button(window, text="Requisitar", command=request_name).pack(pady=5)
+window.protocol("WM_DELETE_WINDOW", on_closing)
+window.mainloop()
