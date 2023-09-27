@@ -9,16 +9,15 @@ class Interface(tkinter.Tk):
         self.create_interface()
 
     def create_interface(self):
-        self.columnconfigure(0)
-
+        
         self.title("LOGIN")
 
-        ttk.Label(self, text="Nome de usuário: ").
-        ttk.Entry(self).
+        ttk.Label(self, text="Nome de usuário: ").pack(side='left')
+        ttk.Entry(self).pack(side='left')
 
-        ttk.Button(self, text="Cadastrar", command=register_name).
+        ttk.Button(self, text="Cadastrar", command=register_name).pack(pady=5)
 
-        ttk.Button(self, text="Requisitar", command=request_name).
+        ttk.Button(self, text="Requisitar", command=request_name).pack(pady=5)
 
     def on_closing(self):
         self.destroy()
