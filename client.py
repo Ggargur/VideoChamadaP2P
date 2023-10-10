@@ -3,9 +3,6 @@ from tkinter import ttk
 
 from protocol import *
 
-import threading
-import time
-
 import socket
 
 user_name = ""
@@ -24,11 +21,7 @@ def start_listening() -> socket.socket:
     s.listen()
     return s
 
-def register_name():
-    global user_entry, user_name
-
-    user_name = user_entry.get()
-    user_entry.delete(0, 100)
+def register_name(user_name: str):
     server_conn = connect_server()
     
     send_code(server_conn, ProtocolCodes.REGISTER_NAME)
@@ -40,34 +33,35 @@ def register_name():
     if status == ProtocolCodes.OK:
         print("Registrador com sucesso")
     elif status == ProtocolCodes.NOT_OK:
-        pass
+        print(f"Nome {user_name} já utilizado")
     server_conn.close()
 
-def request_name():
-    user_name = user_entry.get()
+def unregister_name(user_name: str):
+    server_conn = connect_server()
+
+    send_code(server_conn, ProtocolCodes.UNREGISTER_NAME)
+    send_string(server_conn, user_name)
+
+    status = recv_code(server_conn)
+
+    if status == ProtocolCodes.NOT_OK:
+        print(f"Nome {user_name} não registrado")
+        return
+    print(f"Nome {user_name} descadrastado")
+    server_conn.close()
+
+def request_name(user_name: str):
     server_conn = connect_server()
     
     send_code(server_conn, ProtocolCodes.REQUEST_ADDRESS)
     send_string(server_conn, user_name)
 
     status = recv_code(server_conn)
+    if status == ProtocolCodes.NOT_FOUND:
+        print(f"Endereço de {user_name} não encontrado")
+        return
     host = desserialize_address(recv_int(server_conn))
     port = recv_int(server_conn, 2)
 
     print(f"Nome {user_name} está disponível em {host}:{port}")
-
-def on_closing():
-    global window
-    window.destroy()
-
-window = Tk()
-
-ttk.Label(window, text="Nome de usuário: ").pack(side='left')
-
-user_entry = ttk.Entry(window)
-user_entry.pack(side='left')
-
-ttk.Button(window, text="Cadastrar", command=register_name).pack(pady=5)
-ttk.Button(window, text="Requisitar", command=request_name).pack(pady=5)
-window.protocol("WM_DELETE_WINDOW", on_closing)
-window.mainloop()
+    

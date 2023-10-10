@@ -30,9 +30,14 @@ def handle_request_address(conn: socket.socket):
     send_int(conn, clients_name_to_address[requested_name][1])
 
 def handle_unregister_name(conn: socket.socket):
-    name = recv_string()
+    name = recv_string(conn)
+    if not name in clients_name_to_address:
+        send_code(conn, ProtocolCodes.NOT_OK)
+        print(f"Nome: {name} não registrado")
+        return
     clients_name_to_address.pop(name)
     send_code(conn, ProtocolCodes.OK)
+    print(f"Nome: {name} descadastrado")
 
 def handle_register_name(conn: socket.socket):
     global clients_name_to_address

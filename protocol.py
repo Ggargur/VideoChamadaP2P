@@ -11,13 +11,6 @@ class ProtocolCodes():
     FOUND = 0x2A
 
 SERVER_PORT = 3337
-# def exec(func):
-#     def inner(*args, **kwargs):
-#         try:
-#             func(*args, **kwargs)
-#         except ConnectionResetError as error:
-#             print(error)
-#     return inner
 
 def send_string(connection: socket.socket, message: str) -> int:
     send_int(connection, len(message))
