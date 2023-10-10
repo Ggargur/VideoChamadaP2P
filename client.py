@@ -3,9 +3,6 @@ from tkinter import ttk
 
 from protocol import *
 
-import threading
-import time
-
 import socket
 
 user_name = ""
@@ -24,11 +21,7 @@ def start_listening() -> socket.socket:
     s.listen()
     return s
 
-def register_name():
-    global user_entry, user_name
-
-    user_name = user_entry.get()
-    user_entry.delete(0, 100)
+def register_name(user_name: str):
     server_conn = connect_server()
     
     send_code(server_conn, ProtocolCodes.REGISTER_NAME)
@@ -43,11 +36,7 @@ def register_name():
         print(f"Nome {user_name} já utilizado")
     server_conn.close()
 
-def unregister_name():
-    global user_name, user_entry
-
-    user_name = user_entry.get()
-    user_entry.delete(0, 100)
+def unregister_name(user_name: str):
     server_conn = connect_server()
 
     send_code(server_conn, ProtocolCodes.UNREGISTER_NAME)
@@ -61,8 +50,7 @@ def unregister_name():
     print(f"Nome {user_name} descadrastado")
     server_conn.close()
 
-def request_name():
-    user_name = user_entry.get()
+def request_name(user_name: str):
     server_conn = connect_server()
     
     send_code(server_conn, ProtocolCodes.REQUEST_ADDRESS)
@@ -76,20 +64,4 @@ def request_name():
     port = recv_int(server_conn, 2)
 
     print(f"Nome {user_name} está disponível em {host}:{port}")
-
-def on_closing():
-    global window
-    window.destroy()
-
-window = Tk()
-
-ttk.Label(window, text="Nome de usuário: ").pack(side='left')
-
-user_entry = ttk.Entry(window)
-user_entry.pack(side='left')
-
-ttk.Button(window, text="Cadastrar", command=register_name).pack(pady=5)
-ttk.Button(window, text="Requisitar", command=request_name).pack(pady=5)
-ttk.Button(window, text="Descadastrar", command=unregister_name).pack(pady=5)
-window.protocol("WM_DELETE_WINDOW", on_closing)
-window.mainloop()
+    
