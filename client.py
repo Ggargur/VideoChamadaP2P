@@ -40,7 +40,25 @@ def register_name():
     if status == ProtocolCodes.OK:
         print("Registrador com sucesso")
     elif status == ProtocolCodes.NOT_OK:
-        pass
+        print(f"Nome {user_name} já utilizado")
+    server_conn.close()
+
+def unregister_name():
+    global user_name, user_entry
+
+    user_name = user_entry.get()
+    user_entry.delete(0, 100)
+    server_conn = connect_server()
+
+    send_code(server_conn, ProtocolCodes.UNREGISTER_NAME)
+    send_string(server_conn, user_name)
+
+    status = recv_code(server_conn)
+
+    if status == ProtocolCodes.NOT_OK:
+        print(f"Nome {user_name} não registrado")
+        return
+    print(f"Nome {user_name} descadrastado")
     server_conn.close()
 
 def request_name():
@@ -51,6 +69,9 @@ def request_name():
     send_string(server_conn, user_name)
 
     status = recv_code(server_conn)
+    if status == ProtocolCodes.NOT_FOUND:
+        print(f"Endereço de {user_name} não encontrado")
+        return
     host = desserialize_address(recv_int(server_conn))
     port = recv_int(server_conn, 2)
 
@@ -69,5 +90,6 @@ user_entry.pack(side='left')
 
 ttk.Button(window, text="Cadastrar", command=register_name).pack(pady=5)
 ttk.Button(window, text="Requisitar", command=request_name).pack(pady=5)
+ttk.Button(window, text="Descadastrar", command=unregister_name).pack(pady=5)
 window.protocol("WM_DELETE_WINDOW", on_closing)
 window.mainloop()
