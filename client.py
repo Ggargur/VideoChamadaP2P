@@ -17,12 +17,11 @@ def connect_server() -> socket.socket:
     return server_conn
 
 
-# Abre uma porta do cliente para mensagens com o servidor.
+# Prepara uma porta UDP de um cliente para iniciar uma conexão com outro cliente.
 def start_listening() -> socket.socket:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     s.bind(("0.0.0.0", 0))
-    s.listen()
     return s
 
 
@@ -31,10 +30,12 @@ def start_listening() -> socket.socket:
 # caso contrário apresenta uma mensagem de sucesso.
 def register_name(user_name: str):
     server_conn = connect_server()
+    s = start_listening()
+    (localhost, port) = s.getsockname()
 
     send_code(server_conn, ProtocolCodes.REGISTER_NAME)
     send_string(server_conn, user_name)
-    send_int(server_conn, 2, length=2)
+    send_int(server_conn, port, length=2)
 
     status = recv_code(server_conn)
 
