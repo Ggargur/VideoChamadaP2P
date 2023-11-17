@@ -7,19 +7,34 @@ class Interface(tkinter.Tk):
     # Cria a interface.
     def __init__(self):
         super().__init__()
+        self.frame1 = tkinter.Frame(self)
+        self.frame2 = tkinter.Frame(self)
+        self.user_entry = ttk.Entry(self.frame1)
         self.create_interface()
+
+    def screen_specs(self):
+        self.title("Video Chamada P2P")
+        self.geometry("280x80")
+        self.resizable(False, False)
+
+    def create_name_field(self):
+        ttk.Label(self.frame1, text="Nome de usuário:").grid(column=0, row=0, sticky=tkinter.NW, padx=5, pady=5)
+        self.user_entry.grid(column=1, row=0, sticky=tkinter.NE, padx=5, pady=5)
+
+    def create_buttons(self):
+        ttk.Button(self.frame2, text="Cadastrar", command=self.register_name).pack(side='left', padx=5, pady=5)
+        ttk.Button(self.frame2, text="Descadastrar", command=self.unregister_name).pack(side='left', padx=5, pady=5)
+        ttk.Button(self.frame2, text="Requisitar", command=self.request_name).pack(side='left', padx=5, pady=5)
 
     # Coloca os elementos visuais na interface.
     def create_interface(self):
-        self.title("LOGIN")
+        self.screen_specs()
 
-        ttk.Label(self, text="Nome de usuário: ").pack(side="left")
-        self.user_entry = ttk.Entry(self)
-        self.user_entry.pack(side="left")
+        self.create_buttons()
+        self.create_name_field()
 
-        ttk.Button(self, text="Cadastrar", command=self.register_name).pack(pady=5)
-        ttk.Button(self, text="Descadastrar", command=self.unregister_name).pack(pady=5)
-        ttk.Button(self, text="Requisitar", command=self.request_name).pack(pady=5)
+        self.frame1.pack()
+        self.frame2.pack()
 
     # Chama a função de registrar nome do cliente.
     def register_name(self):
