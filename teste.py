@@ -7,16 +7,7 @@ class App(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-
-        self.pages = {}
-
-        for p in (StartPage, Page1):
-            container = tk.Frame(self)
-            container.pack()
-            page = p(container, self)
-            self.pages[p] = page
-            page.pack()
-
+        self.container = tk.Frame(self)
         self.show_frame(StartPage)
 
     def screen_specs(self, page):
@@ -31,10 +22,12 @@ class App(tk.Tk):
                 self.title("Video Chamada P2P")
                 self.geometry("300x300")
 
-    def show_frame(self, cont):
-        self.screen_specs(cont.__name__)
-        frame = self.pages[cont]
-        frame.tkraise()
+    def show_frame(self, page):
+        self.screen_specs(page.__name__)
+        self.container.pack()
+        p = page(self.container, self)
+        p.pack()
+        p.tkraise()
 
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -50,7 +43,7 @@ class StartPage(tk.Frame):
         self.user_entry.grid(column=1, row=0, sticky=tk.NE, padx=5, pady=5)
 
     def create_buttons(self):
-        ttk.Button(self.second_frame, text="Cadastrar", command=lambda: self.show_frame()).pack(
+        ttk.Button(self.second_frame, text="Cadastrar", command=self.show_frame).pack(
             side='left', padx=5, pady=5)
         ttk.Button(self.second_frame, text="Sair", command=self.on_closing).pack(side='left', padx=5, pady=5)
 
