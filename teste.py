@@ -36,7 +36,6 @@ class App(tk.Tk):
         frame = self.pages[cont]
         frame.tkraise()
 
-
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -51,8 +50,14 @@ class StartPage(tk.Frame):
         self.user_entry.grid(column=1, row=0, sticky=tk.NE, padx=5, pady=5)
 
     def create_buttons(self):
-        ttk.Button(self.second_frame, text="Cadastrar", command=self.register_name).pack(side='left', padx=5, pady=5)
+        ttk.Button(self.second_frame, text="Cadastrar", command=lambda: self.show_frame()).pack(
+            side='left', padx=5, pady=5)
         ttk.Button(self.second_frame, text="Sair", command=self.on_closing).pack(side='left', padx=5, pady=5)
+
+
+    def show_frame(self):
+        self.destroy()
+        self.controller.show_frame(Page1)
 
     def register_name(self):
         register_name(self.user_entry.get())
@@ -71,6 +76,21 @@ class StartPage(tk.Frame):
 class Page1(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.second_frame = ttk.Frame(self)
+        self.second_frame.pack()
+        self.create_buttons()
+
+    def create_buttons(self):
+        ttk.Button(self.second_frame, text="Descadastrar", command=self.unregister_name).pack(side='left', padx=5,
+                                                                                              pady=5)
+        ttk.Button(self.second_frame, text="Requisitar", command=self.request_name).pack(side='left', padx=5, pady=5)
+
+    def unregister_name(self):
+        pass
+
+    def request_name(self):
+        pass
 
 
 app = App()
