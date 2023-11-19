@@ -8,7 +8,7 @@ class App(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.container = tk.Frame(self)
-        self.show_frame(StartPage)
+        self.show_page(Page1)
 
     def screen_specs(self, page):
         match page:
@@ -20,14 +20,15 @@ class App(tk.Tk):
 
             case 'Page1':
                 self.title("Video Chamada P2P")
-                self.geometry("300x300")
+                self.geometry("600x600")
 
-    def show_frame(self, page):
+    def show_page(self, page):
         self.screen_specs(page.__name__)
         self.container.pack()
         p = page(self.container, self)
         p.pack()
         p.tkraise()
+
 
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -43,14 +44,12 @@ class StartPage(tk.Frame):
         self.user_entry.grid(column=1, row=0, sticky=tk.NE, padx=5, pady=5)
 
     def create_buttons(self):
-        ttk.Button(self.second_frame, text="Cadastrar", command=self.show_frame).pack(
-            side='left', padx=5, pady=5)
+        ttk.Button(self.second_frame, text="Cadastrar", command=self.show_page).pack(side='left', padx=5, pady=5)
         ttk.Button(self.second_frame, text="Sair", command=self.on_closing).pack(side='left', padx=5, pady=5)
 
-
-    def show_frame(self):
+    def show_page(self):
         self.destroy()
-        self.controller.show_frame(Page1)
+        self.controller.show_page(Page1)
 
     def register_name(self):
         register_name(self.user_entry.get())
@@ -70,14 +69,15 @@ class Page1(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        self.second_frame = ttk.Frame(self)
-        self.second_frame.pack()
-        self.create_buttons()
+        self.tabs = ttk.Notebook(self)
+        self.create_tabs()
 
-    def create_buttons(self):
-        ttk.Button(self.second_frame, text="Descadastrar", command=self.unregister_name).pack(side='left', padx=5,
-                                                                                              pady=5)
-        ttk.Button(self.second_frame, text="Requisitar", command=self.request_name).pack(side='left', padx=5, pady=5)
+    def create_tabs(self):
+        first_tab = ttk.Frame(self.tabs, width=600, height=600)
+        second_tab = ttk.Frame(self.tabs, width=600, height=600)
+        self.tabs.add(first_tab, text='Descadastar')
+        self.tabs.add(second_tab, text='Requisitar')
+        self.tabs.pack(expand=1, fill='both')
 
     def unregister_name(self):
         pass
