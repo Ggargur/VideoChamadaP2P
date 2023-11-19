@@ -40,6 +40,7 @@ class App(tk.Tk):
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
         self.first_frame = ttk.Frame(self)
         self.second_frame = ttk.Frame(self)
         self.user_entry = ttk.Entry(self.first_frame)
@@ -51,10 +52,14 @@ class StartPage(tk.Frame):
 
     def create_buttons(self):
         ttk.Button(self.second_frame, text="Cadastrar", command=self.register_name).pack(side='left', padx=5, pady=5)
+        ttk.Button(self.second_frame, text="Sair", command=self.on_closing).pack(side='left', padx=5, pady=5)
 
     def register_name(self):
         register_name(self.user_entry.get())
         self.user_entry.delete(0, 100)
+
+    def on_closing(self):
+        self.controller.quit()
 
     def init_page(self):
         self.first_frame.pack()
