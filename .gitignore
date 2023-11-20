@@ -49,6 +49,9 @@ Generated\ Files/
 TestResult.xml
 nunit-*.xml
 
+#jetbrains
+.idea/
+
 # Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
