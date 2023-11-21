@@ -40,7 +40,7 @@ def register_name(user_name: str):
     status = recv_code(server_conn)
 
     if status == ProtocolCodes.OK:
-        print("Registrador com sucesso")
+        print("Registrado com sucesso")
     elif status == ProtocolCodes.NOT_OK:
         print(f"Nome {user_name} já utilizado")
     server_conn.close()
