@@ -8,11 +8,11 @@ class App(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+        self.title("Video Chamada P2P")
         self.pages = tk.Frame(self)
         self.show_page(StartPage)
 
     def screen_specs(self, page):
-        self.title("Video Chamada P2P")
         match page:
             case 'StartPage':
                 self.geometry("280x80")
@@ -27,6 +27,12 @@ class App(tk.Tk):
         p = page(self.pages, self)
         p.pack()
         p.tkraise()
+
+    def on_closing(self):
+        # retirar o cliente da lista de requisições
+        if not messagebox.askyesno("Aviso", "Deseja sair?"):
+            return
+        self.quit()
 
 
 class StartPage(tk.Frame):
@@ -44,21 +50,17 @@ class StartPage(tk.Frame):
 
     def create_buttons(self):
         ttk.Button(self.second_frame, text="Cadastrar", command=self.show_page).pack(side='left', padx=5, pady=5)
-        ttk.Button(self.second_frame, text="Sair", command=self.on_closing).pack(side='left', padx=5, pady=5)
+        ttk.Button(self.second_frame, text="Sair", command=self.controller.on_closing).pack(side='left', padx=5, pady=5)
 
     def show_page(self):
         if self.user_entry.get() == "":
             messagebox.showerror("ERRO", "O campo nome não pode estar vazio")
             return
 
+        # a proxima pagina receberia uma lista dos nomes que o usuario possui
         # register_name(self.user_entry.get()) a mudanca de pagina registra o usuário
         self.destroy()
         self.controller.show_page(Page1)
-
-    def on_closing(self):
-        if not messagebox.askyesno("Aviso", "Deseja sair?"):
-            return
-        self.controller.quit()
 
     def init_page(self):
         self.first_frame.pack()
@@ -92,24 +94,17 @@ class Page1(tk.Frame):
 
     def create_buttons(self):
         ttk.Button(self.buttons, text="Voltar ao login", command=self.show_page).pack(side='left', padx=10, pady=10)
-
-        ttk.Button(self.buttons, text="Sair", command=self.on_closing).pack(side='left', padx=10, pady=10)
-
+        ttk.Button(self.buttons, text="Sair", command=self.controller.on_closing).pack(side='left', padx=10, pady=10)
         self.buttons.pack()
 
     def create_list(self, tab):
         for b in range(10):
-            btn = ttk.Button(tab, text=f'Botão {b}', width=90)
+            btn = ttk.Button(tab, text=f'Botão {b}', width=90, command=self.unregister_name)
             btn.grid(row=b + 1, padx=4, pady=4)
 
     def show_page(self):
         self.destroy()
         self.controller.show_page(StartPage)
-
-    def on_closing(self):
-        if not messagebox.askyesno("Aviso", "Deseja sair?"):
-            return
-        self.controller.quit()
 
 
 app = App()
