@@ -117,10 +117,13 @@ class Page1(tk.Frame):
             btn.grid(row=b + 1, padx=4, pady=4)
 
     def create_searchbar(self, tab):
-        label = ttk.Label(tab, text='Digite o nome de um usuário').pack(padx=10, pady=10)
-        label.config(font=(12))
-        search_entry = ttk.Entry(tab, width=50).pack(padx=10, pady=10)
-        ttk.Button(tab, text='Buscar').pack(padx=10, pady=10)
+        second_tab_frame = ttk.Frame(tab)
+        label = ttk.Label(second_tab_frame, text='Digite o nome de um usuário')
+        label.config(font=12)
+        label.pack(padx=10, pady=10)
+        search_entry = ttk.Entry(second_tab_frame, width=50).pack(padx=10, pady=10)
+        ttk.Button(second_tab_frame, text='Buscar').pack(padx=10, pady=10)
+        second_tab_frame.pack(anchor='center', expand=1)
 
     def show_page(self):
         self.controller.data = {}
