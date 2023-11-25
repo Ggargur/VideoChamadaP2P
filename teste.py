@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from client import request_name, unregister_name, register_name
+from client import connect_with, request_name, unregister_name, register_name
 
 
 class App(tk.Tk):
@@ -122,7 +122,7 @@ class Page1(tk.Frame):
         label.config(font=12)
         label.pack(padx=10, pady=10)
         search_entry = ttk.Entry(second_tab_frame, width=50).pack(padx=10, pady=10)
-        ttk.Button(second_tab_frame, text='Buscar').pack(padx=10, pady=10)
+        ttk.Button(second_tab_frame, text='Buscar', command=lambda : connect_with(search_entry.get())).pack(padx=10, pady=10,)
         second_tab_frame.pack(anchor='center', expand=1)
 
     def show_page(self):

@@ -5,6 +5,10 @@ from protocol import *
 
 import socket
 
+from vidstream import StreamingServer
+import vidstream
+import threading
+
 user_name = ""
 client_names: list[str] = []
 
@@ -31,6 +35,7 @@ def start_listening() -> socket.socket:
 def register_name(user_name: str):
     server_conn = connect_server()
     s = start_listening()
+    start_listening_to_requests(s)
     (localhost, port) = s.getsockname()
 
     send_code(server_conn, ProtocolCodes.REGISTER_NAME)
@@ -96,3 +101,40 @@ def get_all_registered_names():
     
     print("nomes: ")
     print(names)
+
+def start_listener_server():
+    audio_listener = vidstream.AudioReceiver("0.0.0.0", 9998)
+    audio_listener.start_server()
+    server = StreamingServer('0.0.0.0', 9999)
+    server.start_server()
+
+
+def start_listing_to_stream():
+    thead_audio = threading.Thread(target=start_listener_server)
+    thead_audio.start()
+
+
+def start_streaming_server():
+    video_streamer = vidstream.CameraClient('0.0.0.0', 9997)
+    audio_streamer = vidstream.AudioSender("0.0.0.0",9996)
+    
+    audio_streamer.start_stream()
+    video_streamer.start_stream()
+
+def start_listening_to_requests(socket : socket.socket):
+    threading.Thread(target=lambda : listen_to_requests(socket))
+
+def listen_to_requests(socket : socket.socket):
+    code = recv_code(socket)
+    print("Me foi requestado uma chamada")
+
+
+def start_streaming():
+    streamer = threading.Thread(target=start_streaming_server)
+    streamer.start()
+
+def connect_with(address : str, port : int):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    s.bind((address, port))
+    send_code(s, ProtocolCodes.REQUEST_CALL)

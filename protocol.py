@@ -12,6 +12,8 @@ class ProtocolCodes:
     GET_ALL_REGISTERED_NAMES = 0x30
     NOT_FOUND = 0x2F
     FOUND = 0x2A
+    REQUEST_CALL = 0x3F
+    REFUSE_CALL = 0x3A
 
 
 SERVER_PORT = 3337
