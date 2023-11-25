@@ -1,12 +1,7 @@
-from tkinter import *
-from tkinter import ttk
-
 from protocol import *
-
 import socket
-
-from vidstream import StreamingServer
 import vidstream
+from vidstream import StreamingServer
 import threading
 
 user_name = ""

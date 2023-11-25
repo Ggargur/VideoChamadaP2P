@@ -1,61 +1,158 @@
-import tkinter
+import tkinter as tk
 from tkinter import ttk
-from client import request_name, unregister_name, register_name
+from tkinter import messagebox
+from client import request_name, unregister_name, register_name, get_all_registered_names, connect_with
 
 
-class Interface(tkinter.Tk):
-    # Cria a interface.
-    def __init__(self):
-        super().__init__()
-        self.frame1 = tkinter.Frame(self)
-        self.frame2 = tkinter.Frame(self)
-        self.user_entry = ttk.Entry(self.frame1)
-        self.create_interface()
+def call_with_args(func, *args):
+    def callback():
+        func(*args)
 
-    def screen_specs(self):
+    return callback
+
+
+#cria a interface do aplicativo gerencia paginas e o tamanho de janelas
+class App(tk.Tk):
+
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
         self.title("Video Chamada P2P")
-        self.geometry("280x80")
-        self.resizable(False, False)
+        self.pages = tk.Frame(self)
+        self.show_page(StartPage)
+        self.data = {}
 
+    #gerencia do tamanho das janelas do aplicativo
+    def screen_specs(self, page):
+        match page:
+            case 'StartPage':
+                self.geometry("280x80")
+                self.resizable(False, False)
+
+            case 'Page1':
+                self.geometry("650x600")
+
+    # mostra a pagina atual
+    def show_page(self, page):
+        self.screen_specs(page.__name__)
+        self.pages.pack()
+        p = page(self.pages, self)
+        p.pack()
+        p.tkraise()
+
+    #callback para fechar o arquivo
+    def on_closing(self):
+        if not messagebox.askyesno("Aviso", "Deseja sair?"):
+            return
+        self.quit()
+
+
+#primeira pagina do aplicativo, onde e realizado o cadastro de usuario
+class StartPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.first_frame = ttk.Frame(self)
+        self.second_frame = ttk.Frame(self)
+        self.user_entry = ttk.Entry(self.first_frame)
+        self.init_page()
+
+    # cria o campo para cadastro do usuario e sua label
     def create_name_field(self):
-        ttk.Label(self.frame1, text="Nome de usuário:").grid(column=0, row=0, sticky=tkinter.NW, padx=5, pady=5)
-        self.user_entry.grid(column=1, row=0, sticky=tkinter.NE, padx=5, pady=5)
+        ttk.Label(self.first_frame, text="Nome de usuário:").grid(column=0, row=0, sticky=tk.NW, padx=5, pady=5)
+        self.user_entry.grid(column=1, row=0, sticky=tk.NE, padx=5, pady=5)
+
+    # cria os botoes para castro e saida do programa
+    def create_buttons(self):
+        ttk.Button(self.second_frame, text="Cadastrar", command=self.show_page).pack(side='left', padx=5, pady=5)
+        ttk.Button(self.second_frame, text="Sair", command=self.controller.on_closing).pack(side='left', padx=5, pady=5)
+
+
+    # sobrecarga do metodo original, carrega as informacoes obtidas do campo de cadastro e todos os nomes de usuario,
+    # obtidos dos servidor
+    def show_page(self):
+        if self.user_entry.get() == "":
+            messagebox.showerror("ERRO", "O campo nome não pode estar vazio")
+            return
+
+        register_name(self.user_entry.get())
+        self.controller.data['username'] = self.user_entry.get()
+        self.controller.data['all_names'] = get_all_registered_names()
+        self.destroy()
+        self.controller.show_page(Page1)
+
+    #carrega os elementos da pagina
+    def init_page(self):
+        self.first_frame.pack()
+        self.second_frame.pack()
+        self.create_name_field()
+        self.create_buttons()
+
+
+#contem a lista de nomes do usuario para serem descadastrados e a busca para a requisicao de videoconferencias
+class Page1(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.greetings = ttk.Frame(self)
+        self.tabs = ttk.Notebook(self, width=650, height=490)
+        self.buttons = ttk.Frame(self)
+        self.add_name_to_greetings()
+        self.create_tabs()
+        self.create_buttons()
+
+    def add_name_to_greetings(self):
+        greeting_label = ttk.Label(self.greetings, text=f"Bem vindo, {self.controller.data['username']}")
+        greeting_label.grid(column=0, row=0, sticky=tk.N, padx=5, pady=5)
+        greeting_label.config(font=12)
+        self.greetings.pack()
+
+    def create_tabs(self):
+        first_tab = ttk.Frame(self.tabs)
+        second_tab = ttk.Frame(self.tabs)
+        self.tabs.add(first_tab, text='Descadastar')
+        self.create_list(first_tab)
+        self.tabs.add(second_tab, text='Requisitar')
+        self.create_searchbar(second_tab)
+        self.tabs.pack(expand=1, fill='both')
+
+    def unregister_name(self, name: str, btn: ttk.Button):
+        if not messagebox.askyesno("Aviso", "Deseja deletar esse nome?"):
+            return
+        else:
+            unregister_name(name)
+            if self.controller.data['username'] == name:
+                self.controller.quit()
+            else:
+                btn.destroy()
+
+    def request_name(self):
+        pass
 
     def create_buttons(self):
-        ttk.Button(self.frame2, text="Cadastrar", command=self.register_name).pack(side='left', padx=5, pady=5)
-        ttk.Button(self.frame2, text="Descadastrar", command=self.unregister_name).pack(side='left', padx=5, pady=5)
-        ttk.Button(self.frame2, text="Requisitar", command=self.request_name).pack(side='left', padx=5, pady=5)
+        ttk.Button(self.buttons, text="Voltar ao login", command=self.show_page).pack(side='left', padx=10, pady=10)
+        ttk.Button(self.buttons, text="Sair", command=self.controller.on_closing).pack(side='left', padx=10, pady=10)
+        self.buttons.pack()
 
-    # Coloca os elementos visuais na interface.
-    def create_interface(self):
-        self.screen_specs()
+    def create_list(self, tab):
+        for b in range(len(self.controller.data['all_names'])):
+            btn = ttk.Button(tab, text=f"{self.controller.data['all_names'][b]}", width=90)
+            btn['command'] = call_with_args(self.unregister_name, self.controller.data['all_names'][b], btn)
+            btn.grid(row=b + 1, padx=4, pady=4)
 
-        self.create_buttons()
-        self.create_name_field()
+    def create_searchbar(self, tab):
+        second_tab_frame = ttk.Frame(tab)
+        label = ttk.Label(second_tab_frame, text='Digite o nome de um usuário')
+        label.config(font=12)
+        label.pack(padx=10, pady=10)
+        search_entry = ttk.Entry(second_tab_frame, width=50).pack(padx=10, pady=10)
+        ttk.Button(second_tab_frame, text='Buscar', command=self.request_name).pack(padx=10, pady=10)
+        second_tab_frame.pack(anchor='center', expand=1)
 
-        self.frame1.pack()
-        self.frame2.pack()
-
-    # Chama a função de registrar nome do cliente.
-    def register_name(self):
-        register_name(self.user_entry.get())
-        self.user_entry.delete(0, 100)
-
-    # Chama a função de desregistrar nome do cliente.
-    def unregister_name(self):
-        unregister_name(self.user_entry.get())
-        self.user_entry.delete(0, 100)
-
-    # Chama a função de requisitar informações por um nome do cliente.
-    def request_name(self):
-        request_name(self.user_entry.get())
-        self.user_entry.delete(0, 100)
-
-    # Callback ao fechar interface.
-    def on_closing(self):
+    def show_page(self):
+        self.controller.data = {}
         self.destroy()
+        self.controller.show_page(StartPage)
 
 
-if __name__ == "__main__":
-    interface = Interface()
-    interface.mainloop()
+app = App()
+app.mainloop()
