@@ -96,3 +96,5 @@ def get_all_registered_names():
     
     print("nomes: ")
     print(names)
+
+    return names
