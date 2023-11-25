@@ -130,7 +130,7 @@ class Page1(tk.Frame):
         label.config(font=12)
         label.pack(padx=10, pady=10)
         search_entry = ttk.Entry(second_tab_frame, width=50).pack(padx=10, pady=10)
-        ttk.Button(second_tab_frame, text='Buscar').pack(padx=10, pady=10)
+        ttk.Button(second_tab_frame, text='Buscar').pack(padx=10, pady=10, command=self.request_name)
         second_tab_frame.pack(anchor='center', expand=1)
 
     def show_page(self):
