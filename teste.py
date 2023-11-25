@@ -78,7 +78,7 @@ class Page1(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.greetings = ttk.Frame(self)
-        self.tabs = ttk.Notebook(self)
+        self.tabs = ttk.Notebook(self, width=650, height=490)
         self.buttons = ttk.Frame(self)
         self.add_name_to_greetings()
         self.create_tabs()
@@ -91,8 +91,8 @@ class Page1(tk.Frame):
         self.greetings.pack()
 
     def create_tabs(self):
-        first_tab = ttk.Frame(self.tabs, width=550, height=490)
-        second_tab = ttk.Frame(self.tabs, width=550, height=490)
+        first_tab = ttk.Frame(self.tabs)
+        second_tab = ttk.Frame(self.tabs)
         self.tabs.add(first_tab, text='Descadastar')
         self.create_list(first_tab)
         self.tabs.add(second_tab, text='Requisitar')
