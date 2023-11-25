@@ -6,7 +6,13 @@ import threading
 
 user_name = ""
 client_names: list[str] = []
+accept_request_method : function
 
+video_streamer : vidstream.CameraClient
+audio_streamer : vidstream.AudioSender
+
+audio_listener : vidstream.AudioReceiver
+streaming_server : vidstream.StreamingServer
 
 # Conecta-se ao servidor.
 def connect_server() -> socket.socket:
@@ -99,16 +105,27 @@ def get_all_registered_names():
     return names
 
 def start_listener_server():
+    global audio_listener, streaming_server
     audio_listener = vidstream.AudioReceiver("0.0.0.0", 9998)
+    streaming_server = vidstream.StreamingServer('0.0.0.0', 9999)
+    
     audio_listener.start_server()
-    server = StreamingServer('0.0.0.0', 9999)
-    server.start_server()
+    streaming_server.start_server()
 
 
 def start_listing_to_stream():
     thead_audio = threading.Thread(target=start_listener_server)
     thead_audio.start()
 
+def stop_call():
+    if video_streamer is not None:
+        video_streamer.stop_stream
+    if audio_streamer is not None:
+        audio_streamer.stop_stream()
+    if audio_listener is not None:
+        audio_listener.stop_server()
+    if streaming_server is not None:
+        streaming_server.stop_server()
 
 def start_streaming_server():
     video_streamer = vidstream.CameraClient('0.0.0.0', 9997)
@@ -122,7 +139,19 @@ def start_listening_to_requests(socket : socket.socket):
 
 def listen_to_requests(socket : socket.socket):
     code = recv_code(socket)
-    print("Me foi requestado uma chamada")
+    if(code == ProtocolCodes.REQUEST_CALL): # Inserir input para recusar
+        accepted = True
+        if(accept_request_method is not None):
+            accepted = accept_request_method()
+        if accepted:
+            start_streaming()
+            start_listing_to_stream()
+            send_code(ProtocolCodes.ACCEPT_CALL)
+        else:
+            send_code(ProtocolCodes.REFUSE_CALL)
+        print("Me foi requestado uma chamada.")
+    start_listening_to_requests(socket)
+        
 
 
 def start_streaming():
@@ -131,6 +160,15 @@ def start_streaming():
 
 def connect_with(address : str, port : int):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
     s.bind((address, port))
+    start_listing_to_stream()
     send_code(s, ProtocolCodes.REQUEST_CALL)
+    answer = recv_code(s)
+    if answer == ProtocolCodes.ACCEPT_CALL:
+        start_streaming()
+    else:
+        stop_call()
+
+def update_request_method(new_method : function):
+    global accept_request_method
+    accept_request_method = new_method

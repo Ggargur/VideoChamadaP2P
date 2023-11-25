@@ -11,7 +11,7 @@ def call_with_args(func, *args):
     return callback
 
 
-#cria a interface do aplicativo gerencia paginas e o tamanho de janelas
+#cria a interface do aplicativo, gerencia paginas e o tamanho de janelas
 class App(tk.Tk):
 
     def __init__(self, *args, **kwargs):
