@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from client import request_name, unregister_name, register_name, get_all_registered_names, connect_with
+from client import request_name, unregister_name, register_name, get_all_registered_names, connect_with, update_request_method
 
 
 # metodo para a retirada de nomes na lista de descadastrar
@@ -97,6 +97,7 @@ class Page1(tk.Frame):
         self.greetings = ttk.Frame(self)
         self.tabs = ttk.Notebook(self, width=650, height=490)
         self.buttons = ttk.Frame(self)
+        update_request_method(self.accept_request)
         self.init_page()
 
     # frase de boas vindas, com a inclusao do nome de usuario atual
@@ -132,6 +133,9 @@ class Page1(tk.Frame):
     def request_name(self):
         pass
 
+    def accept_request(self, adress : str) -> bool:
+        return messagebox.askyesno("Aviso", f"Você está sendo chamado(a) por {adress}, deseja aceitar?")
+
     # Cria botoes em Page1 que permitem ao usuario voltar para StartPage ou sair do aplicativo
     def create_buttons(self):
         ttk.Button(self.buttons, text="Voltar ao login", command=self.show_page).pack(side='left', padx=10, pady=10)
@@ -145,16 +149,21 @@ class Page1(tk.Frame):
             btn['command'] = call_with_args(self.unregister_name, self.controller.data['all_names'][b], btn)
             btn.grid(row=b + 1, padx=4, pady=4)
 
+    def start_connection(self):
+        adrss, port = request_name(self.search_entry.get())
+        connect_with(adrss, port)
+
     # cria o campo de busca, o botao para realiza-la e uma label na tab requisitar
     def create_searchbar(self, tab):
         second_tab_frame = ttk.Frame(tab)
         label = ttk.Label(second_tab_frame, text='Digite o nome de um usuário')
-        search_entry = ttk.Entry(second_tab_frame, width=50)
-        ttk.Button(second_tab_frame, text='Buscar', command=search_entry.get()).pack(padx=10, pady=10)
+        self.search_entry = ttk.Entry(second_tab_frame, width=50)
+        ttk.Button(second_tab_frame, text='Buscar', command=self.start_connection).pack(padx=10, pady=10)
         label.config(font=12)
         label.pack(padx=10, pady=10)
-        search_entry.pack(padx=10, pady=10)
+        self.search_entry.pack(padx=10, pady=10)
         second_tab_frame.pack(anchor='center', expand=1)
+
 
     #carrega os elementos da pagina
     def init_page(self):

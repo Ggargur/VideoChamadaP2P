@@ -160,7 +160,6 @@ def start_streaming():
 
 def connect_with(address : str, port : int):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind((address, port))
     start_listing_to_stream()
     send_code(s, ProtocolCodes.REQUEST_CALL)
     answer = recv_code(s)
