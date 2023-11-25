@@ -11,6 +11,7 @@ class App(tk.Tk):
         self.title("Video Chamada P2P")
         self.pages = tk.Frame(self)
         self.show_page(StartPage)
+        self.data = {}
 
     def screen_specs(self, page):
         match page:
@@ -58,7 +59,10 @@ class StartPage(tk.Frame):
             return
 
         # a proxima pagina receberia uma lista dos nomes que o usuario possui
-        # register_name(self.user_entry.get()) a mudanca de pagina registra o usuário
+
+        # register_name(self.user_entry.get())
+        self.controller.data['username'] = self.user_entry.get()
+        # self.data['all_names'] = get_all_names_from_client(self.user_entry.get())
         self.destroy()
         self.controller.show_page(Page1)
 
@@ -73,17 +77,27 @@ class Page1(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.greetings = ttk.Frame(self)
         self.tabs = ttk.Notebook(self)
         self.buttons = ttk.Frame(self)
+        self.add_name_to_greetings()
         self.create_tabs()
         self.create_buttons()
 
+    def add_name_to_greetings(self):
+        greeting_label = ttk.Label(self.greetings, text=f"Bem vindo, {self.controller.data['username']}")
+        greeting_label.grid(column=0, row=0, sticky=tk.N, padx=5, pady=5)
+        greeting_label.config(font=(12))
+        self.greetings.pack()
+
     def create_tabs(self):
-        first_tab = ttk.Frame(self.tabs, width=550, height=530)
-        second_tab = ttk.Frame(self.tabs, width=550, height=530)
+        print(self.controller.data)
+        first_tab = ttk.Frame(self.tabs, width=550, height=490)
+        second_tab = ttk.Frame(self.tabs, width=550, height=490)
         self.tabs.add(first_tab, text='Descadastar')
         self.create_list(first_tab)
         self.tabs.add(second_tab, text='Requisitar')
+        self.create_searchbar(second_tab)
         self.tabs.pack(expand=1, fill='both')
 
     def unregister_name(self):
@@ -98,11 +112,18 @@ class Page1(tk.Frame):
         self.buttons.pack()
 
     def create_list(self, tab):
-        for b in range(10):
+        for b in range(10):  # len(self.data['all.names'])
             btn = ttk.Button(tab, text=f'Botão {b}', width=90, command=self.unregister_name)
             btn.grid(row=b + 1, padx=4, pady=4)
 
+    def create_searchbar(self, tab):
+        label = ttk.Label(tab, text='Digite o nome de um usuário').pack(padx=10, pady=10)
+        label.config(font=(12))
+        search_entry = ttk.Entry(tab, width=50).pack(padx=10, pady=10)
+        ttk.Button(tab, text='Buscar').pack(padx=10, pady=10)
+
     def show_page(self):
+        self.controller.data = {}
         self.destroy()
         self.controller.show_page(StartPage)
 
