@@ -4,6 +4,7 @@ from tkinter import messagebox
 from client import request_name, unregister_name, register_name, get_all_registered_names, connect_with
 
 
+# metodo para a retirada de nomes na lista de descadastrar
 def call_with_args(func, *args):
     def callback():
         func(*args)
@@ -11,7 +12,7 @@ def call_with_args(func, *args):
     return callback
 
 
-#cria a interface do aplicativo, gerencia paginas e o tamanho de janelas
+# cria a interface do aplicativo, gerencia paginas e o tamanho de janelas
 class App(tk.Tk):
 
     def __init__(self, *args, **kwargs):
@@ -21,7 +22,7 @@ class App(tk.Tk):
         self.show_page(StartPage)
         self.data = {}
 
-    #gerencia do tamanho das janelas do aplicativo
+    # gerencia do tamanho das janelas do aplicativo
     def screen_specs(self, page):
         match page:
             case 'StartPage':
@@ -39,14 +40,14 @@ class App(tk.Tk):
         p.pack()
         p.tkraise()
 
-    #callback para fechar o arquivo
+    # callback para fechar o arquivo
     def on_closing(self):
         if not messagebox.askyesno("Aviso", "Deseja sair?"):
             return
         self.quit()
 
 
-#primeira pagina do aplicativo, onde e realizado o cadastro de usuario
+# primeira pagina do aplicativo, onde e realizado o cadastro de usuario
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -56,19 +57,19 @@ class StartPage(tk.Frame):
         self.user_entry = ttk.Entry(self.first_frame)
         self.init_page()
 
-    # cria o campo para cadastro do usuario e sua label
+    # cria o campo para cadastro do usuario e sua label 'Nome de Usuário'
     def create_name_field(self):
         ttk.Label(self.first_frame, text="Nome de usuário:").grid(column=0, row=0, sticky=tk.NW, padx=5, pady=5)
         self.user_entry.grid(column=1, row=0, sticky=tk.NE, padx=5, pady=5)
 
-    # cria os botoes para castro e saida do programa
+    # cria os botoes para cadastro e saida do programa
     def create_buttons(self):
         ttk.Button(self.second_frame, text="Cadastrar", command=self.show_page).pack(side='left', padx=5, pady=5)
         ttk.Button(self.second_frame, text="Sair", command=self.controller.on_closing).pack(side='left', padx=5, pady=5)
 
-
     # sobrecarga do metodo show_page: carrega as informacoes obtidas do campo de cadastro e todos os nomes de usuario,
-    # obtidos dos servidor
+    # obtidos do servidor, que serao colocados como atributos da class Page1. Caso o campo de cadastro estja vazio,
+    # aparecera uma mensagem de erro
     def show_page(self):
         if self.user_entry.get() == "":
             messagebox.showerror("ERRO", "O campo nome não pode estar vazio")
@@ -80,7 +81,7 @@ class StartPage(tk.Frame):
         self.destroy()
         self.controller.show_page(Page1)
 
-    #carrega os elementos da pagina
+    # carrega os elementos de StartPage
     def init_page(self):
         self.first_frame.pack()
         self.second_frame.pack()
@@ -88,7 +89,7 @@ class StartPage(tk.Frame):
         self.create_buttons()
 
 
-#contem a lista de nomes do usuario para serem descadastrados e a busca para a requisicao de videoconferencias
+# contem a lista de nomes do usuario para serem descadastrados e a busca para a requisicao de videoconferencias
 class Page1(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -96,16 +97,17 @@ class Page1(tk.Frame):
         self.greetings = ttk.Frame(self)
         self.tabs = ttk.Notebook(self, width=650, height=490)
         self.buttons = ttk.Frame(self)
-        self.add_name_to_greetings()
-        self.create_tabs()
-        self.create_buttons()
+        self.init_page()
 
+    # frase de boas vindas, com a inclusao do nome de usuario atual
     def add_name_to_greetings(self):
         greeting_label = ttk.Label(self.greetings, text=f"Bem vindo, {self.controller.data['username']}")
         greeting_label.grid(column=0, row=0, sticky=tk.N, padx=5, pady=5)
         greeting_label.config(font=12)
         self.greetings.pack()
 
+    # criacao de tabs da segunda pagina do aplicativo, contendo a lista de nomes para descadastrar e
+    # a de busca de usuario para inciar uma videoconferencia
     def create_tabs(self):
         first_tab = ttk.Frame(self.tabs)
         second_tab = ttk.Frame(self.tabs)
@@ -115,6 +117,8 @@ class Page1(tk.Frame):
         self.create_searchbar(second_tab)
         self.tabs.pack(expand=1, fill='both')
 
+    # descadastra um nome de usuario da lista presente na tab 'Descadastrar'. Caso esse nome seja o atual do usuário,
+    # o aplicativo e fechado
     def unregister_name(self, name: str, btn: ttk.Button):
         if not messagebox.askyesno("Aviso", "Deseja deletar esse nome?"):
             return
@@ -128,26 +132,38 @@ class Page1(tk.Frame):
     def request_name(self):
         pass
 
+    # Cria botoes em Page1 que permitem ao usuario voltar para StartPage ou sair do aplicativo
     def create_buttons(self):
         ttk.Button(self.buttons, text="Voltar ao login", command=self.show_page).pack(side='left', padx=10, pady=10)
         ttk.Button(self.buttons, text="Sair", command=self.controller.on_closing).pack(side='left', padx=10, pady=10)
         self.buttons.pack()
 
+    # cria a lista de nomes de usuario para descadastro
     def create_list(self, tab):
         for b in range(len(self.controller.data['all_names'])):
             btn = ttk.Button(tab, text=f"{self.controller.data['all_names'][b]}", width=90)
             btn['command'] = call_with_args(self.unregister_name, self.controller.data['all_names'][b], btn)
             btn.grid(row=b + 1, padx=4, pady=4)
 
+    # cria o campo de busca, o botao para realiza-la e uma label na tab requisitar
     def create_searchbar(self, tab):
         second_tab_frame = ttk.Frame(tab)
         label = ttk.Label(second_tab_frame, text='Digite o nome de um usuário')
+        search_entry = ttk.Entry(second_tab_frame, width=50)
+        ttk.Button(second_tab_frame, text='Buscar', command=search_entry.get()).pack(padx=10, pady=10)
         label.config(font=12)
         label.pack(padx=10, pady=10)
-        search_entry = ttk.Entry(second_tab_frame, width=50).pack(padx=10, pady=10)
-        ttk.Button(second_tab_frame, text='Buscar', command=self.request_name).pack(padx=10, pady=10)
+        search_entry.pack(padx=10, pady=10)
         second_tab_frame.pack(anchor='center', expand=1)
 
+    #carrega os elementos da pagina
+    def init_page(self):
+        self.add_name_to_greetings()
+        self.create_tabs()
+        self.create_buttons()
+
+    #sobrecarga do metodo show_page: neste metodo a saida faz com que os dados passados como atributos por StartPage
+    #sejam eliminados
     def show_page(self):
         self.controller.data = {}
         self.destroy()
