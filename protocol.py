@@ -13,6 +13,7 @@ class ProtocolCodes:
     NOT_FOUND = 0x2F
     FOUND = 0x2A
     REQUEST_CALL = 0x3F
+    ACCEPT_CALL = 0x3B
     REFUSE_CALL = 0x3A
 
 
