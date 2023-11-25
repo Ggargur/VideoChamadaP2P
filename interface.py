@@ -67,7 +67,7 @@ class StartPage(tk.Frame):
         ttk.Button(self.second_frame, text="Sair", command=self.controller.on_closing).pack(side='left', padx=5, pady=5)
 
 
-    # sobrecarga do metodo original, carrega as informacoes obtidas do campo de cadastro e todos os nomes de usuario,
+    # sobrecarga do metodo show_page: carrega as informacoes obtidas do campo de cadastro e todos os nomes de usuario,
     # obtidos dos servidor
     def show_page(self):
         if self.user_entry.get() == "":
