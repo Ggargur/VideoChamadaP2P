@@ -150,11 +150,11 @@ class Page1(tk.Frame):
         second_tab_frame = ttk.Frame(tab)
         label = ttk.Label(second_tab_frame, text='Digite o nome de um usuário')
         search_entry = ttk.Entry(second_tab_frame, width=50)
-        ttk.Button(second_tab_frame, text='Buscar', command=search_entry.get()).pack(padx=10, pady=10)
         label.config(font=12)
         label.pack(padx=10, pady=10)
         search_entry.pack(padx=10, pady=10)
         second_tab_frame.pack(anchor='center', expand=1)
+        ttk.Button(second_tab_frame, text='Buscar', command=search_entry.get()).pack(padx=10, pady=10)
 
     #carrega os elementos da pagina
     def init_page(self):

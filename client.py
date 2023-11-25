@@ -6,13 +6,14 @@ import threading
 
 user_name = ""
 client_names: list[str] = []
-accept_request_method : function
+accept_request_method: str
 
-video_streamer : vidstream.CameraClient
-audio_streamer : vidstream.AudioSender
+video_streamer: vidstream.CameraClient
+audio_streamer: vidstream.AudioSender
 
-audio_listener : vidstream.AudioReceiver
-streaming_server : vidstream.StreamingServer
+audio_listener: vidstream.AudioReceiver
+streaming_server: vidstream.StreamingServer
+
 
 # Conecta-se ao servidor.
 def connect_server() -> socket.socket:
@@ -88,6 +89,7 @@ def request_name(user_name: str):
 
     print(f"Nome {user_name} está disponível em {host}:{port}")
 
+
 def get_all_registered_names():
     server_conn = connect_server()
 
@@ -99,16 +101,17 @@ def get_all_registered_names():
     for i in range(n_codes):
         name = recv_string(server_conn)
         names.append(name)
-    
+
     print("nomes: ")
     print(names)
     return names
+
 
 def start_listener_server():
     global audio_listener, streaming_server
     audio_listener = vidstream.AudioReceiver("0.0.0.0", 9998)
     streaming_server = vidstream.StreamingServer('0.0.0.0', 9999)
-    
+
     audio_listener.start_server()
     streaming_server.start_server()
 
@@ -116,6 +119,7 @@ def start_listener_server():
 def start_listing_to_stream():
     thead_audio = threading.Thread(target=start_listener_server)
     thead_audio.start()
+
 
 def stop_call():
     if video_streamer is not None:
@@ -127,21 +131,24 @@ def stop_call():
     if streaming_server is not None:
         streaming_server.stop_server()
 
+
 def start_streaming_server():
     video_streamer = vidstream.CameraClient('0.0.0.0', 9997)
-    audio_streamer = vidstream.AudioSender("0.0.0.0",9996)
-    
+    audio_streamer = vidstream.AudioSender("0.0.0.0", 9996)
+
     audio_streamer.start_stream()
     video_streamer.start_stream()
 
-def start_listening_to_requests(socket : socket.socket):
-    threading.Thread(target=lambda : listen_to_requests(socket))
 
-def listen_to_requests(socket : socket.socket):
+def start_listening_to_requests(socket: socket.socket):
+    threading.Thread(target=lambda: listen_to_requests(socket))
+
+
+def listen_to_requests(socket: socket.socket):
     code = recv_code(socket)
-    if(code == ProtocolCodes.REQUEST_CALL): # Inserir input para recusar
+    if (code == ProtocolCodes.REQUEST_CALL):  # Inserir input para recusar
         accepted = True
-        if(accept_request_method is not None):
+        if (accept_request_method is not None):
             accepted = accept_request_method()
         if accepted:
             start_streaming()
@@ -151,14 +158,14 @@ def listen_to_requests(socket : socket.socket):
             send_code(ProtocolCodes.REFUSE_CALL)
         print("Me foi requestado uma chamada.")
     start_listening_to_requests(socket)
-        
 
 
 def start_streaming():
     streamer = threading.Thread(target=start_streaming_server)
     streamer.start()
 
-def connect_with(address : str, port : int):
+
+def connect_with(address: str, port: int):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((address, port))
     start_listing_to_stream()
@@ -169,6 +176,7 @@ def connect_with(address : str, port : int):
     else:
         stop_call()
 
-def update_request_method(new_method : function):
+
+def update_request_method(new_method: str):
     global accept_request_method
     accept_request_method = new_method
