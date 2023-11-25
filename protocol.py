@@ -9,6 +9,7 @@ class ProtocolCodes:
     REGISTER_NAME = 0x10
     UNREGISTER_NAME = 0x1F
     REQUEST_ADDRESS = 0x20
+    GET_ALL_REGISTERED_NAMES = 0x30
     NOT_FOUND = 0x2F
     FOUND = 0x2A
 
