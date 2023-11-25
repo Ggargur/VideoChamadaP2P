@@ -66,6 +66,18 @@ def handle_register_name(conn: socket.socket):
     log(f"register_name: {name} registrado")
     send_code(conn, ProtocolCodes.OK)
 
+def handle_get_all_registered_names(conn: socket.socket):
+    # code = recv_code()
+    ip = conn.getsockname()[0]
+
+    names = []
+    for k,v in clients_name_to_address.items():
+        if v[0] == ip:
+            names.append(k)
+
+    send_int(conn, len(names))
+    for n in names:
+        send_string(conn, n)
 
 # Reconhece uma informação recebida por uma conexão, tratando indicar o método correto para o tipo de mensagem recebida e termina encerrando a conexão.
 # Essas podendo ser: cadastramento ou descadastramento diferentes clientes ou requisições.
@@ -77,6 +89,8 @@ def handle_connection(conn: socket.socket, address: socket.AddressInfo):
         handle_request_address(conn)
     elif code == ProtocolCodes.UNREGISTER_NAME:
         handle_unregister_name(conn)
+    elif code == ProtocolCodes.GET_ALL_REGISTERED_NAMES:
+        handle_get_all_registered_names(conn)
     conn.close()
     print(f"Conexão de {address} encerrada")
 

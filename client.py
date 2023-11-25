@@ -81,3 +81,18 @@ def request_name(user_name: str):
     port = recv_int(server_conn, 2)
 
     print(f"Nome {user_name} está disponível em {host}:{port}")
+
+def get_all_registered_names():
+    server_conn = connect_server()
+
+    send_code(server_conn, ProtocolCodes.GET_ALL_REGISTERED_NAMES)
+
+    n_codes = recv_int(server_conn)
+
+    names = []
+    for i in range(n_codes):
+        name = recv_string(server_conn)
+        names.append(name)
+    
+    print("nomes: ")
+    print(names)
