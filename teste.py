@@ -3,6 +3,10 @@ from tkinter import ttk
 from tkinter import messagebox
 from client import request_name, unregister_name, register_name, get_all_registered_names,connect_with
 
+def call_with_args(func, *args):
+    def callback():
+        func(*args)
+    return callback
 
 class App(tk.Tk):
 
@@ -99,7 +103,7 @@ class Page1(tk.Frame):
         self.create_searchbar(second_tab)
         self.tabs.pack(expand=1, fill='both')
 
-    def unregister_name(self, name):
+    def unregister_name(self, name: str, btn: ttk.Button):
         if not messagebox.askyesno("Aviso", "Deseja deletar esse nome?"):
             return
         else:
@@ -107,8 +111,8 @@ class Page1(tk.Frame):
             if self.controller.data['username'] == name:
                 self.controller.quit()
             else:
-                self.controller.data['all_names'] = get_all_registered_names()
-                self.controller.show_page(Page1)
+                btn.destroy()
+
 
     def request_name(self):
         pass
@@ -120,8 +124,8 @@ class Page1(tk.Frame):
 
     def create_list(self, tab):
         for b in range(len(self.controller.data['all_names'])):
-            btn = ttk.Button(tab, text=f"{self.controller.data['all_names'][b]}", width=90,
-                             command=lambda: self.unregister_name(self.controller.data['all_names'][b]))
+            btn = ttk.Button(tab, text=f"{self.controller.data['all_names'][b]}", width=90)
+            btn['command'] = call_with_args(self.unregister_name, self.controller.data['all_names'][b], btn)
             btn.grid(row=b + 1, padx=4, pady=4)
 
     def create_searchbar(self, tab):
@@ -130,7 +134,7 @@ class Page1(tk.Frame):
         label.config(font=12)
         label.pack(padx=10, pady=10)
         search_entry = ttk.Entry(second_tab_frame, width=50).pack(padx=10, pady=10)
-        ttk.Button(second_tab_frame, text='Buscar').pack(padx=10, pady=10, command=self.request_name)
+        ttk.Button(second_tab_frame, text='Buscar', command=self.request_name).pack(padx=10, pady=10)
         second_tab_frame.pack(anchor='center', expand=1)
 
     def show_page(self):
