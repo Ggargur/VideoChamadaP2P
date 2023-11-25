@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from client import connect_with, request_name, unregister_name, register_name
+from client import request_name, unregister_name, register_name, get_all_registered_names,connect_with
 
 
 class App(tk.Tk):
@@ -60,9 +60,9 @@ class StartPage(tk.Frame):
 
         # a proxima pagina receberia uma lista dos nomes que o usuario possui
 
-        # register_name(self.user_entry.get())
+        register_name(self.user_entry.get())
         self.controller.data['username'] = self.user_entry.get()
-        # self.data['all_names'] = get_all_names_from_client(self.user_entry.get())
+        self.controller.data['all_names'] = get_all_registered_names()
         self.destroy()
         self.controller.show_page(Page1)
 
@@ -87,11 +87,10 @@ class Page1(tk.Frame):
     def add_name_to_greetings(self):
         greeting_label = ttk.Label(self.greetings, text=f"Bem vindo, {self.controller.data['username']}")
         greeting_label.grid(column=0, row=0, sticky=tk.N, padx=5, pady=5)
-        greeting_label.config(font=(12))
+        greeting_label.config(font=12)
         self.greetings.pack()
 
     def create_tabs(self):
-        print(self.controller.data)
         first_tab = ttk.Frame(self.tabs, width=550, height=490)
         second_tab = ttk.Frame(self.tabs, width=550, height=490)
         self.tabs.add(first_tab, text='Descadastar')
@@ -100,8 +99,16 @@ class Page1(tk.Frame):
         self.create_searchbar(second_tab)
         self.tabs.pack(expand=1, fill='both')
 
-    def unregister_name(self):
-        pass
+    def unregister_name(self, name):
+        if not messagebox.askyesno("Aviso", "Deseja deletar esse nome?"):
+            return
+        else:
+            unregister_name(name)
+            if self.controller.data['username'] == name:
+                self.controller.quit()
+            else:
+                self.controller.data['all_names'] = get_all_registered_names()
+                self.controller.show_page(Page1)
 
     def request_name(self):
         pass
@@ -112,8 +119,9 @@ class Page1(tk.Frame):
         self.buttons.pack()
 
     def create_list(self, tab):
-        for b in range(10):  # len(self.data['all.names'])
-            btn = ttk.Button(tab, text=f'Botão {b}', width=90, command=self.unregister_name)
+        for b in range(len(self.controller.data['all_names'])):
+            btn = ttk.Button(tab, text=f"{self.controller.data['all_names'][b]}", width=90,
+                             command=lambda: self.unregister_name(self.controller.data['all_names'][b]))
             btn.grid(row=b + 1, padx=4, pady=4)
 
     def create_searchbar(self, tab):
@@ -122,7 +130,7 @@ class Page1(tk.Frame):
         label.config(font=12)
         label.pack(padx=10, pady=10)
         search_entry = ttk.Entry(second_tab_frame, width=50).pack(padx=10, pady=10)
-        ttk.Button(second_tab_frame, text='Buscar', command=lambda : connect_with(search_entry.get())).pack(padx=10, pady=10,)
+        ttk.Button(second_tab_frame, text='Buscar').pack(padx=10, pady=10)
         second_tab_frame.pack(anchor='center', expand=1)
 
     def show_page(self):

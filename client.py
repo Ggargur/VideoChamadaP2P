@@ -101,6 +101,7 @@ def get_all_registered_names():
     
     print("nomes: ")
     print(names)
+    return names
 
 def start_listener_server():
     audio_listener = vidstream.AudioReceiver("0.0.0.0", 9998)
