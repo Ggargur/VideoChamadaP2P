@@ -6,7 +6,7 @@ import threading
 
 user_name = ""
 client_names: list[str] = []
-accept_request_method : function
+accept_request_method = lambda:1
 
 video_streamer : vidstream.CameraClient
 audio_streamer : vidstream.AudioSender
@@ -152,7 +152,7 @@ def listen_to_requests(socket : socket.socket):
             send_code(ProtocolCodes.REFUSE_CALL)
         print("Me foi requestado uma chamada.")
     start_listening_to_requests(socket)
-        
+
 
 
 def start_streaming():
@@ -170,6 +170,6 @@ def connect_with(address : str, port : int):
     else:
         stop_call()
 
-def update_request_method(new_method : function):
+def update_request_method(new_method):
     global accept_request_method
     accept_request_method = new_method

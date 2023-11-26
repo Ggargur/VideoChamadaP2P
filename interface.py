@@ -109,13 +109,16 @@ class Page1(tk.Frame):
     # criacao de tabs da segunda pagina do aplicativo, contendo a lista de nomes para descadastrar e
     # a de busca de usuario para inciar uma videoconferencia
     def create_tabs(self):
-        first_tab = ttk.Frame(self.tabs)
-        second_tab = ttk.Frame(self.tabs)
-        self.tabs.add(first_tab, text='Descadastar')
-        self.create_list(first_tab)
-        self.tabs.add(second_tab, text='Requisitar')
-        self.create_searchbar(second_tab)
+        self.first_tab = ttk.Frame(self.tabs)
+        self.second_tab = ttk.Frame(self.tabs)
+        self.tabs.add(self.first_tab, text='Descadastar')
+        self.create_list(self.first_tab)
+        self.tabs.add(self.second_tab, text='Requisitar')
+        self.create_searchbar(self.second_tab)
         self.tabs.pack(expand=1, fill='both')
+
+    def connect_to(self, name, host, ip):
+        print("conectando-se a", name, host, ip)
 
     # descadastra um nome de usuario da lista presente na tab 'Descadastrar'. Caso esse nome seja o atual do usuário,
     # o aplicativo e fechado
@@ -129,8 +132,21 @@ class Page1(tk.Frame):
             else:
                 btn.destroy()
 
-    def request_name(self):
-        pass
+    def request_name(self, entry: ttk.Entry):
+        name = entry.get()
+        if name == "":
+            if not messagebox.showwarning("Alerta", "Nome não pode ser vazio"):
+                return
+            return
+        host, ip = request_name(name)
+        if ip <0:
+            messagebox.showwarning("Não encontrado", f"Usuário {name} não encontrado")
+            return
+        else:
+            messagebox.showinfo("Usuário Encontrado", f"Usuário {name} encontrado em {host}:{ip}")
+        b = ttk.Button(self.second_tab, text=f"Conectar-se a {name}")
+        b['command'] = call_with_args(self.connect_to, name, host, ip)
+        b.pack(padx=4, pady=4)
 
     # Cria botoes em Page1 que permitem ao usuario voltar para StartPage ou sair do aplicativo
     def create_buttons(self):
@@ -150,7 +166,9 @@ class Page1(tk.Frame):
         second_tab_frame = ttk.Frame(tab)
         label = ttk.Label(second_tab_frame, text='Digite o nome de um usuário')
         search_entry = ttk.Entry(second_tab_frame, width=50)
-        ttk.Button(second_tab_frame, text='Buscar', command=search_entry.get()).pack(padx=10, pady=10)
+        b = ttk.Button(second_tab_frame, text='Buscar')
+        b.pack(padx=10, pady=10)
+        b['command'] = call_with_args(self.request_name, search_entry)
         label.config(font=12)
         label.pack(padx=10, pady=10)
         search_entry.pack(padx=10, pady=10)

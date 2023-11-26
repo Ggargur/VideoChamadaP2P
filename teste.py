@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from client import request_name, unregister_name, register_name, get_all_registered_names, connect_with
 
+# chamar função com argumentos
 def call_with_args(func, *args):
     def callback():
         func(*args)
