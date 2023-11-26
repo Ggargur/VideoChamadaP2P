@@ -18,7 +18,7 @@ streaming_server: vidstream.StreamingServer = None
 
 # Conecta-se ao servidor.
 def connect_server() -> socket.socket:
-    SERVER_ADDRESS = ("0.0.0.0", SERVER_PORT)
+    SERVER_ADDRESS = ("localhost", SERVER_PORT)
     server_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_conn.connect(SERVER_ADDRESS)
     return server_conn
