@@ -72,7 +72,7 @@ def unregister_name(user_name: str):
 # Envia para o servidor uma requisição por um endereço e porta, atráves de um nome.
 # Apresenta mensagem de erro caso o servidor detecte um erro na transação (pelo fato do nome não estar cadastrado),
 # caso contrário transforma o endereço IP em string, e apresenta o nome junto com seus respectivos endereço e porta.
-def request_name(user_name: str):
+def request_name(user_name: str) -> tuple[str, int]:
     server_conn = connect_server()
 
     send_code(server_conn, ProtocolCodes.REQUEST_ADDRESS)
@@ -81,11 +81,12 @@ def request_name(user_name: str):
     status = recv_code(server_conn)
     if status == ProtocolCodes.NOT_FOUND:
         print(f"Endereço de {user_name} não encontrado")
-        return
+        return ("Não encontrado", -1)
     host = desserialize_address(recv_int(server_conn))
     port = recv_int(server_conn, 2)
 
     print(f"Nome {user_name} está disponível em {host}:{port}")
+    return (host, port)
 
 def get_all_registered_names():
     server_conn = connect_server()
