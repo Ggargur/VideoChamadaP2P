@@ -1,3 +1,4 @@
+from typing import Callable
 from protocol import *
 import socket
 import vidstream
@@ -6,17 +7,17 @@ import threading
 
 user_name = ""
 client_names: list[str] = []
-accept_request_method = lambda:1
+accept_request_method : Callable
 
-video_streamer : vidstream.CameraClient
-audio_streamer : vidstream.AudioSender
+video_streamer : vidstream.CameraClient = None
+audio_streamer : vidstream.AudioSender = None
 
-audio_listener : vidstream.AudioReceiver
-streaming_server : vidstream.StreamingServer
+audio_listener : vidstream.AudioReceiver = None
+streaming_server : vidstream.StreamingServer = None
 
 # Conecta-se ao servidor.
 def connect_server() -> socket.socket:
-    SERVER_ADDRESS = ("localhost", SERVER_PORT)
+    SERVER_ADDRESS = ("0.0.0.0", SERVER_PORT)
     server_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_conn.connect(SERVER_ADDRESS)
     return server_conn
@@ -100,14 +101,15 @@ def get_all_registered_names():
     for i in range(n_codes):
         name = recv_string(server_conn)
         names.append(name)
-    
+
     print("nomes: ")
     print(names)
     return names
 
+
 def start_listener_server():
     global audio_listener, streaming_server
-    audio_listener = vidstream.AudioReceiver("0.0.0.0", 9998)
+    audio_listener = vidstream.AudioReceiver("0.0.0.0", 6666)
     streaming_server = vidstream.StreamingServer('0.0.0.0', 9999)
     
     audio_listener.start_server()
@@ -118,6 +120,21 @@ def start_listing_to_stream():
     thead_audio = threading.Thread(target=start_listener_server)
     thead_audio.start()
 
+def start_streaming_server():
+    video_streamer = vidstream.CameraClient('0.0.0.0', 9999)
+    audio_streamer = vidstream.AudioSender("0.0.0.0",6666)
+    
+    audio_streamer.start_stream()
+    video_streamer.start_stream()
+
+def start_streaming():
+    streamer = threading.Thread(target=start_streaming_server)
+    streamer.start()
+
+def start_listening_to_requests(socket : socket.socket):
+    a = threading.Thread(target=lambda : listen_to_requests(socket))
+    a.start()
+
 def stop_call():
     if video_streamer is not None:
         video_streamer.stop_stream
@@ -127,16 +144,7 @@ def stop_call():
         audio_listener.stop_server()
     if streaming_server is not None:
         streaming_server.stop_server()
-
-def start_streaming_server():
-    video_streamer = vidstream.CameraClient('0.0.0.0', 9997)
-    audio_streamer = vidstream.AudioSender("0.0.0.0",9996)
-    
-    audio_streamer.start_stream()
-    video_streamer.start_stream()
-
-def start_listening_to_requests(socket : socket.socket):
-    threading.Thread(target=lambda : listen_to_requests(socket))
+        streaming_server = None
 
 def listen_to_requests(socket : socket.socket):
     global accept_request_method
@@ -167,8 +175,8 @@ def accept_call(socket : socket.socket):
 
 
 def connect_with(address : str, port : int):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind((address, port))
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((address, port))
     start_listing_to_stream()
     send_code(s, ProtocolCodes.REQUEST_CALL)
     answer = recv_code(s)
@@ -177,6 +185,6 @@ def connect_with(address : str, port : int):
     else:
         stop_call()
 
-def update_request_method(new_method):
+def update_request_method(new_method : Callable):
     global accept_request_method
     accept_request_method = new_method
