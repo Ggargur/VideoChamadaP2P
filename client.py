@@ -113,6 +113,11 @@ def get_all_registered_names():
     return names
 
 
+def get_main_frame():
+    if streaming_server is not None:
+        return streaming_server.main_frame
+    return None
+
 def start_listener_server():
     global audio_listener, streaming_server
     audio_listener = audio.AudioReceiver("0.0.0.0", 6666)

@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import Image, ttk
+from tkinter import ttk
+from PIL import ImageTk
 from tkinter import messagebox
 from client import quit as quit_client
 from client import (
@@ -9,7 +10,8 @@ from client import (
     get_all_registered_names,
     connect_with,
     update_request_method,
-    stop_call
+    stop_call,
+    get_main_frame
 )
 
 
@@ -114,6 +116,7 @@ class Page1(tk.Frame):
         self.tabs = ttk.Notebook(self, width=650, height=490)
         self.buttons = ttk.Frame(self)
         self.init_page()
+        self.video_frame.pack()
 
     # frase de boas vindas, com a inclusao do nome de usuario atual
     def add_name_to_greetings(self):
