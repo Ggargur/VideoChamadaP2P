@@ -1,24 +1,24 @@
 from typing import Callable
 from protocol import *
 import socket
-import vidstream
-from vidstream import StreamingServer
+import stream.streaming as streaming
+import stream.audio as audio
 import threading
 
 user_name = ""
 client_names: list[str] = []
 accept_request_method: Callable
 
-video_streamer: vidstream.CameraClient = None
-audio_streamer: vidstream.AudioSender = None
+video_streamer: streaming.CameraClient = None
+audio_streamer: audio.AudioSender = None
 
-audio_listener: vidstream.AudioReceiver = None
-streaming_server: vidstream.StreamingServer = None
+audio_listener: audio.AudioReceiver = None
+streaming_server: streaming.StreamingServer = None
 
 
 # Conecta-se ao servidor.
 def connect_server() -> socket.socket:
-    SERVER_ADDRESS = ("localhost", SERVER_PORT)
+    SERVER_ADDRESS = ("0.0.0.0", SERVER_PORT)
     server_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_conn.connect(SERVER_ADDRESS)
     return server_conn
@@ -112,8 +112,9 @@ def get_all_registered_names():
 
 def start_listener_server():
     global audio_listener, streaming_server
-    audio_listener = vidstream.AudioReceiver("0.0.0.0", 6666)
-    streaming_server = vidstream.StreamingServer("0.0.0.0", 9999)
+    audio_listener = audio.AudioReceiver("0.0.0.0", 6666)
+    streaming_server = streaming.StreamingServer("0.0.0.0", 9999)
+    streaming_server.main_frame
 
     audio_listener.start_server()
     streaming_server.start_server()
@@ -125,8 +126,8 @@ def start_listing_to_stream():
 
 
 def start_streaming_server():
-    video_streamer = vidstream.CameraClient("0.0.0.0", 9999)
-    audio_streamer = vidstream.AudioSender("0.0.0.0", 6666)
+    video_streamer = streaming.CameraClient("0.0.0.0", 9999)
+    audio_streamer = audio.AudioSender("0.0.0.0", 6666)
 
     audio_streamer.start_stream()
     video_streamer.start_stream()
@@ -181,24 +182,31 @@ def get_connection_accept_input(adress: str) -> bool:
 
 
 def accept_call(socket: socket.socket):
-    start_listing_to_stream()
-    send_code(socket, ProtocolCodes.ACCEPT_CALL)
-    code = recv_code(socket)
-    if code == ProtocolCodes.STARTED_STREAMING:
-        start_streaming()
+    try:
+        start_listing_to_stream()
+        send_code(socket, ProtocolCodes.ACCEPT_CALL)
+        code = recv_code(socket)
+        if code == ProtocolCodes.STARTED_STREAMING:
+            start_streaming()
+    except:
+        print("Não consegui abrir a câmera")
 
 
 def connect_with(address: str, port: int):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((address, port))
-    start_listing_to_stream()
-    send_code(s, ProtocolCodes.REQUEST_CALL)
-    answer = recv_code(s)
-    if answer == ProtocolCodes.ACCEPT_CALL:
-        start_streaming()
-        send_code(s, ProtocolCodes.STARTED_STREAMING)
-    else:
-        stop_call()
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((address, port))
+        start_listing_to_stream()
+        send_code(s, ProtocolCodes.REQUEST_CALL)
+        answer = recv_code(s)
+        if answer == ProtocolCodes.ACCEPT_CALL:
+            start_streaming()
+            send_code(s, ProtocolCodes.STARTED_STREAMING)
+            return (video_streamer, audio_listener)
+        else:
+            stop_call()
+    except:
+        print("Não consegui me conectar com esse usuário.")
 
 
 def update_request_method(new_method: Callable):
