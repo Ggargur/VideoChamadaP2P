@@ -156,19 +156,28 @@ def listen_to_requests(socket : socket.socket):
     while True:
         (connection, adress_conection) = socket.accept()
         code = recv_code(connection)
-        if(code == ProtocolCodes.REQUEST_CALL): # Inserir input para recusar
-            accepted = True
-            if(accept_request_method is not None):
-                accepted = accept_request_method(adress_conection)
-            if accepted:
-                start_listing_to_stream()
-                send_code(connection,ProtocolCodes.ACCEPT_CALL)
-                code = recv_code(connection)
-                if code == ProtocolCodes.STARTED_STREAMING:
-                    start_streaming()
-            else:
-                send_code(connection,ProtocolCodes.REFUSE_CALL)
-            print("Me foi requestado uma chamada.")
+        if(code == ProtocolCodes.REQUEST_CALL):
+            handle_connection_request(connection, adress_conection)
+
+def handle_connection_request(connection : socket.socket, adress : str):
+    print("Me foi requestado uma chamada.")
+    if get_connection_accept_input(adress):
+        accept_call(connection)
+    else:
+        send_code(connection,ProtocolCodes.REFUSE_CALL)
+
+def get_connection_accept_input(adress : str):
+    if(accept_request_method is not None):
+        return accept_request_method(adress)
+    return True
+
+def accept_call(socket : socket.socket):
+    start_listing_to_stream()
+    send_code(socket,ProtocolCodes.ACCEPT_CALL)
+    code = recv_code(socket)
+    if code == ProtocolCodes.STARTED_STREAMING:
+        start_streaming()
+
 
 def connect_with(address : str, port : int):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
