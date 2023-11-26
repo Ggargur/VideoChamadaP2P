@@ -15,6 +15,7 @@ class ProtocolCodes:
     REQUEST_CALL = 0x3F
     ACCEPT_CALL = 0x3B
     REFUSE_CALL = 0x3A
+    STARTED_STREAMING = 0x3C
 
 
 SERVER_PORT = 3337
