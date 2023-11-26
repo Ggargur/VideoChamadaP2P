@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Image, ttk
 from tkinter import messagebox
+from client import quit as quit_client
 from client import (
     request_name,
     unregister_name,
@@ -51,6 +52,7 @@ class App(tk.Tk):
     def on_closing(self):
         if not messagebox.askyesno("Aviso", "Deseja sair?"):
             return
+        quit_client()
         stop_call()
         self.quit()
 

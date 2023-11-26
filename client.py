@@ -15,6 +15,11 @@ audio_streamer: audio.AudioSender = None
 audio_listener: audio.AudioReceiver = None
 streaming_server: streaming.StreamingServer = None
 
+streamer_thread : threading.Thread = None
+listener_thread : threading.Thread = None
+request_thread : threading.Thread = None
+
+is_running = True
 
 # Conecta-se ao servidor.
 def connect_server() -> socket.socket:
@@ -112,17 +117,20 @@ def start_listener_server():
     global audio_listener, streaming_server
     audio_listener = audio.AudioReceiver("0.0.0.0", 6666)
     streaming_server = streaming.StreamingServer("0.0.0.0", 9999)
-    streaming_server.main_frame
 
     audio_listener.start_server()
     streaming_server.start_server()
 
+def get_main_frame():
+    return streaming_server.main_frame
 
 def start_listing_to_stream():
     thead_audio = threading.Thread(target=start_listener_server)
     thead_audio.start()
 
+
 def start_streaming_server():
+    global video_streamer, audio_streamer
     video_streamer = streaming.CameraClient("0.0.0.0", 9999)
     audio_streamer = audio.AudioSender("0.0.0.0", 6666)
 
@@ -130,12 +138,15 @@ def start_streaming_server():
     video_streamer.start_stream()
 
 def start_streaming():
-    streamer = threading.Thread(target=start_streaming_server)
-    streamer.start()
+    global streamer_thread
+    streamer_thread = threading.Thread(target=start_streaming_server)
+    streamer_thread.start()
 
-def start_listening_to_requests(socket : socket.socket):
-    a = threading.Thread(target=lambda : listen_to_requests(socket))
-    a.start()
+
+def start_listening_to_requests(socket: socket.socket):
+    global request_thread
+    request_thread = threading.Thread(target=lambda: listen_to_requests(socket))
+    request_thread.start()
 
 def stop_call():
     if video_streamer is not None:
@@ -148,9 +159,10 @@ def stop_call():
         streaming_server.stop_server()
         streaming_server = None
 
-def listen_to_requests(socket : socket.socket):
-    global accept_request_method
-    while True:
+
+def listen_to_requests(socket: socket.socket):
+    global accept_request_method, is_running
+    while is_running:
         (connection, adress_conection) = socket.accept()
         code = recv_code(connection)
         if(code == ProtocolCodes.REQUEST_CALL):
@@ -196,6 +208,13 @@ def connect_with(address: str, port: int):
     except:
         print("Não consegui me conectar com esse usuário.")
 
-def update_request_method(new_method : Callable):
+
+
+def update_request_method(new_method: Callable):
     global accept_request_method
     accept_request_method = new_method
+
+def quit():
+    global listener_thread, streamer_thread, request_thread, is_running
+    stop_call()
+    is_running = False
