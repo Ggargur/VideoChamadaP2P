@@ -31,9 +31,10 @@ def connect_server() -> socket.socket:
 
 # Prepara uma porta UDP de um cliente para iniciar uma conexão com outro cliente.
 def start_listening() -> socket.socket:
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     s.bind(("0.0.0.0", 0))
+    s.listen()
     return s
 
 
@@ -133,33 +134,17 @@ def start_listing_to_stream():
     thead_audio = threading.Thread(target=start_listener_server)
     thead_audio.start()
 
-
-def start_streaming_server():
-    global video_streamer, audio_streamer
-    video_streamer = streaming.CameraClient("0.0.0.0", 9999)
-    audio_streamer = audio.AudioSender("0.0.0.0", 6666)
-
-    audio_streamer.start_stream()
-    video_streamer.start_stream()
-
-def start_streaming():
-    global streamer_thread
-    streamer_thread = threading.Thread(target=start_streaming_server)
-    streamer_thread.start()
-
-
-def start_listening_to_requests(socket: socket.socket):
-    global request_thread
-    request_thread = threading.Thread(target=listen_to_requests, args=(socket,), daemon=True)
-    request_thread.start()
-
 def stop_call():
+    global video_streamer, audio_streamer, streaming_server, audio_listener
     if video_streamer is not None:
-        video_streamer.stop_stream
+        video_streamer.stop_stream()
+        video_streamer = None
     if audio_streamer is not None:
         audio_streamer.stop_stream()
+        audio_streamer = None
     if audio_listener is not None:
         audio_listener.stop_server()
+        audio_listener = None
     if streaming_server is not None:
         streaming_server.stop_server()
         streaming_server = None
@@ -214,6 +199,16 @@ def connect_with(address: str, port: int):
         print("Não consegui me conectar com esse usuário.")
 
 
+def connect_with(address : str, port : int):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind((address, port))
+    start_listing_to_stream()
+    send_code(s, ProtocolCodes.REQUEST_CALL)
+    answer = recv_code(s)
+    if answer == ProtocolCodes.ACCEPT_CALL:
+        start_streaming()
+    else:
+        stop_call()
 
 def update_request_method(new_method: Callable):
     global accept_request_method

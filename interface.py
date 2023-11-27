@@ -115,6 +115,8 @@ class Page1(tk.Frame):
         self.greetings = ttk.Frame(self)
         self.tabs = ttk.Notebook(self, width=650, height=490)
         self.buttons = ttk.Frame(self)
+        self.video_frame = ttk.Frame(self)
+        update_request_method(self.accept_request)
         self.init_page()
         self.video_frame.pack()
 
@@ -169,6 +171,11 @@ class Page1(tk.Frame):
         b['command'] = call_with_args(self.connect_to, name, host, ip)
         b.pack(padx=4, pady=4)
 
+    def accept_request(self, adress: str) -> bool:
+        return messagebox.askyesno(
+            "Aviso", f"Você está sendo chamado(a) por {adress}, deseja aceitar?"
+        )
+
     # Cria botoes em Page1 que permitem ao usuario voltar para StartPage ou sair do aplicativo
     def create_buttons(self):
         ttk.Button(self.buttons, text="Voltar ao login", command=self.show_page).pack(
@@ -190,6 +197,13 @@ class Page1(tk.Frame):
             )
             btn.grid(row=b + 1, padx=4, pady=4)
 
+    def start_connection(self):
+        adrss, port = request_name(self.search_entry.get())
+        if connect_with(adrss, port) is not None:
+            while True:
+                frame = get_main_frame()
+                self.video_frame['frame'] = ImageTk.PhotoImage(frame)
+
     # cria o campo de busca, o botao para realiza-la e uma label na tab requisitar
     def create_searchbar(self, tab):
         second_tab_frame = ttk.Frame(tab)
@@ -200,10 +214,10 @@ class Page1(tk.Frame):
         b['command'] = call_with_args(self.request_name, search_entry)
         label.config(font=12)
         label.pack(padx=10, pady=10)
-        search_entry.pack(padx=10, pady=10)
-        second_tab_frame.pack(anchor='center', expand=1)
+        self.search_entry.pack(padx=10, pady=10)
+        second_tab_frame.pack(anchor="center", expand=1)
 
-    #carrega os elementos da pagina
+    # carrega os elementos da pagina
     def init_page(self):
         self.add_name_to_greetings()
         self.create_tabs()
