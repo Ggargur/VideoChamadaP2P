@@ -127,12 +127,34 @@ def start_listener_server():
     audio_listener.start_server()
     streaming_server.start_server()
 
-def get_main_frame():
-    return streaming_server.main_frame
 
 def start_listing_to_stream():
-    thead_audio = threading.Thread(target=start_listener_server)
-    thead_audio.start()
+    global listener_thread
+    listener_thread = threading.Thread(target=start_listener_server)
+    listener_thread.start()
+
+
+
+def start_listening_to_requests(socket: socket.socket):
+    global request_thread
+    request_thread = threading.Thread(target=listen_to_requests, args=(socket,), daemon=True)
+    request_thread.start()
+
+
+
+def start_streaming_server():
+    global video_streamer, audio_streamer
+    video_streamer = streaming.CameraClient("0.0.0.0", 9999)
+    audio_streamer = audio.AudioSender("0.0.0.0", 6666)
+
+    audio_streamer.start_stream()
+    video_streamer.start_stream()
+
+def start_streaming():
+    global streamer_thread
+    streamer_thread = threading.Thread(target=start_streaming_server)
+    streamer_thread.start()
+
 
 def stop_call():
     global video_streamer, audio_streamer, streaming_server, audio_listener
@@ -197,18 +219,8 @@ def connect_with(address: str, port: int):
             stop_call()
     except:
         print("Não consegui me conectar com esse usuário.")
-
-
-def connect_with(address : str, port : int):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind((address, port))
-    start_listing_to_stream()
-    send_code(s, ProtocolCodes.REQUEST_CALL)
-    answer = recv_code(s)
-    if answer == ProtocolCodes.ACCEPT_CALL:
-        start_streaming()
-    else:
         stop_call()
+
 
 def update_request_method(new_method: Callable):
     global accept_request_method

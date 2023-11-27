@@ -31,6 +31,7 @@ class App(tk.Tk):
         self.pages = tk.Frame(self)
         self.show_page(StartPage)
         self.data = {}
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     # gerencia do tamanho das janelas do aplicativo
     def screen_specs(self, page):
@@ -55,7 +56,6 @@ class App(tk.Tk):
         if not messagebox.askyesno("Aviso", "Deseja sair?"):
             return
         quit_client()
-        stop_call()
         self.quit()
 
 
@@ -161,14 +161,14 @@ class Page1(tk.Frame):
             if not messagebox.showwarning("Alerta", "Nome não pode ser vazio"):
                 return
             return
-        host, ip = request_name(name)
-        if ip <0:
+        host, port = request_name(name)
+        if port <0:
             messagebox.showwarning("Não encontrado", f"Usuário {name} não encontrado")
             return
         else:
-            messagebox.showinfo("Usuário Encontrado", f"Usuário {name} encontrado em {host}:{ip}")
+            messagebox.showinfo("Usuário Encontrado", f"Usuário {name} encontrado em {host}:{port}")
         b = ttk.Button(self.second_tab, text=f"Conectar-se a {name}")
-        b['command'] = call_with_args(self.connect_to, name, host, ip)
+        b['command'] = call_with_args(connect_with, host, port)
         b.pack(padx=4, pady=4)
 
     def accept_request(self, adress: str) -> bool:
@@ -208,10 +208,10 @@ class Page1(tk.Frame):
     def create_searchbar(self, tab):
         second_tab_frame = ttk.Frame(tab)
         label = ttk.Label(second_tab_frame, text='Digite o nome de um usuário')
-        search_entry = ttk.Entry(second_tab_frame, width=50)
+        self.search_entry = ttk.Entry(second_tab_frame, width=50)
         b = ttk.Button(second_tab_frame, text='Buscar')
         b.pack(padx=10, pady=10)
-        b['command'] = call_with_args(self.request_name, search_entry)
+        b['command'] = call_with_args(self.request_name, self.search_entry)
         label.config(font=12)
         label.pack(padx=10, pady=10)
         self.search_entry.pack(padx=10, pady=10)
