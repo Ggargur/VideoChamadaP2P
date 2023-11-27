@@ -6,7 +6,7 @@ from log import *
 
 from protocol import *
 
-HOST = "localhost"
+HOST = "0.0.0.0"
 PORT = SERVER_PORT
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -69,7 +69,7 @@ def handle_register_name(conn: socket.socket):
 
 def handle_get_all_registered_names(conn: socket.socket):
     # code = recv_code()
-    ip = conn.getsockname()[0]
+    ip = conn.getpeername()[0]
 
     names = []
     for k, v in clients_name_to_address.items():
