@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import Image, ttk
+from tkinter import ttk
+from PIL import ImageTk
 from tkinter import messagebox
 from client import quit as quit_client
 from client import (
@@ -9,7 +10,8 @@ from client import (
     get_all_registered_names,
     connect_with,
     update_request_method,
-    stop_call
+    stop_call,
+    get_main_frame
 )
 
 
@@ -113,8 +115,10 @@ class Page1(tk.Frame):
         self.greetings = ttk.Frame(self)
         self.tabs = ttk.Notebook(self, width=650, height=490)
         self.buttons = ttk.Frame(self)
+        self.video_frame = ttk.Frame(self)
         update_request_method(self.accept_request)
         self.init_page()
+        self.video_frame.pack()
 
     # frase de boas vindas, com a inclusao do nome de usuario atual
     def add_name_to_greetings(self):
@@ -179,7 +183,10 @@ class Page1(tk.Frame):
 
     def start_connection(self):
         adrss, port = request_name(self.search_entry.get())
-        connect_with(adrss, port)
+        if connect_with(adrss, port) is not None:
+            while True:
+                frame = get_main_frame()
+                self.video_frame['frame'] = ImageTk.PhotoImage(frame)
 
     # cria o campo de busca, o botao para realiza-la e uma label na tab requisitar
     def create_searchbar(self, tab):
