@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-from PIL import ImageTk
 from tkinter import messagebox
-from client import quit as quit_client
+from client import quit_client
 from client import (
     request_name,
     unregister_name,
@@ -10,8 +9,6 @@ from client import (
     get_all_registered_names,
     connect_with,
     update_request_method,
-    stop_call,
-    get_main_frame
 )
 
 
@@ -162,12 +159,12 @@ class Page1(tk.Frame):
                 return
             return
         host, port = request_name(name)
-        if port <0:
+        if port < 0:
             messagebox.showwarning("Não encontrado", f"Usuário {name} não encontrado")
             return
         else:
             messagebox.showinfo("Usuário Encontrado", f"Usuário {name} encontrado em {host}:{port}")
-        b = ttk.Button(self.second_tab, text=f"Conectar-se a {name}")
+        b = ttk.Button(self.second_tab, width=50, text=f"Conectar-se a {name}")
         b['command'] = call_with_args(connect_with, host, port)
         b.pack(padx=4, pady=4)
 
@@ -197,25 +194,18 @@ class Page1(tk.Frame):
             )
             btn.grid(row=b + 1, padx=4, pady=4)
 
-    def start_connection(self):
-        adrss, port = request_name(self.search_entry.get())
-        if connect_with(adrss, port) is not None:
-            while True:
-                frame = get_main_frame()
-                self.video_frame['frame'] = ImageTk.PhotoImage(frame)
-
     # cria o campo de busca, o botao para realiza-la e uma label na tab requisitar
     def create_searchbar(self, tab):
         second_tab_frame = ttk.Frame(tab)
         label = ttk.Label(second_tab_frame, text='Digite o nome de um usuário')
         self.search_entry = ttk.Entry(second_tab_frame, width=50)
         b = ttk.Button(second_tab_frame, text='Buscar')
-        b.pack(padx=10, pady=10)
-        b['command'] = call_with_args(self.request_name, self.search_entry)
         label.config(font=12)
         label.pack(padx=10, pady=10)
         self.search_entry.pack(padx=10, pady=10)
+        b.pack(padx=10, pady=10)
         second_tab_frame.pack(anchor="center", expand=1)
+        b['command'] = call_with_args(self.request_name, self.search_entry)
 
     # carrega os elementos da pagina
     def init_page(self):

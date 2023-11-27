@@ -1,4 +1,3 @@
-from typing import Callable
 from protocol import *
 import socket
 import stream.streaming as streaming
@@ -7,7 +6,7 @@ import threading
 
 user_name = ""
 client_names: list[str] = []
-accept_request_method : Callable
+accept_request_method: callable
 
 video_streamer: streaming.CameraClient = None
 audio_streamer: audio.AudioSender = None
@@ -15,15 +14,16 @@ audio_streamer: audio.AudioSender = None
 audio_listener: audio.AudioReceiver = None
 streaming_server: streaming.StreamingServer = None
 
-streamer_thread : threading.Thread = None
-listener_thread : threading.Thread = None
-request_thread : threading.Thread = None
+streamer_thread: threading.Thread = None
+listener_thread: threading.Thread = None
+request_thread: threading.Thread = None
 
 is_running = True
 
+
 # Conecta-se ao servidor.
 def connect_server() -> socket.socket:
-    SERVER_ADDRESS = ("10.42.0.184", SERVER_PORT)
+    SERVER_ADDRESS = ("0.0.0.0", SERVER_PORT)
     server_conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_conn.connect(SERVER_ADDRESS)
     return server_conn
@@ -97,6 +97,7 @@ def request_name(user_name: str) -> tuple[str, int]:
     print(f"Nome {user_name} está disponível em {host}:{port}")
     return (host, port)
 
+
 def get_all_registered_names():
     server_conn = connect_server()
 
@@ -113,12 +114,6 @@ def get_all_registered_names():
     print(names)
     return names
 
-
-def get_main_frame():
-    if streaming_server is not None:
-        return streaming_server.main_frame
-    return None
-
 def start_listener_server():
     global audio_listener, streaming_server
     # audio_listener = audio.AudioReceiver("0.0.0.0", 6666)
@@ -128,11 +123,10 @@ def start_listener_server():
     streaming_server.start_server()
 
 
-def start_listing_to_stream():
+def start_listening_to_stream():
     global listener_thread
     listener_thread = threading.Thread(target=start_listener_server)
     listener_thread.start()
-
 
 
 def start_listening_to_requests(socket: socket.socket):
@@ -141,8 +135,7 @@ def start_listening_to_requests(socket: socket.socket):
     request_thread.start()
 
 
-
-def start_streaming_server(address : str):
+def start_streaming_server(address: str):
     global video_streamer, audio_streamer
     video_streamer = streaming.CameraClient(address, 9999)
     # audio_streamer = audio.AudioSender("0.0.0.0", 6666)
@@ -150,7 +143,8 @@ def start_streaming_server(address : str):
     # audio_streamer.start_stream()
     video_streamer.start_stream()
 
-def start_streaming(address : str):
+
+def start_streaming(address: str):
     global streamer_thread
     streamer_thread = threading.Thread(target=start_streaming_server, args=(address,))
     streamer_thread.start()
@@ -177,24 +171,26 @@ def listen_to_requests(socket: socket.socket):
     while is_running:
         (connection, address_conection) = socket.accept()
         code = recv_code(connection)
-        if(code == ProtocolCodes.REQUEST_CALL):
+        if (code == ProtocolCodes.REQUEST_CALL):
             handle_connection_request(connection, address_conection)
 
-def handle_connection_request(connection : socket.socket, address : str):
-    print("Me foi requestado uma chamada.")
+
+def handle_connection_request(connection: socket.socket, address: str):
+    print("Me foi requesitada uma chamada.")
     if get_connection_accept_input(address):
         accept_call(connection)
     else:
-        send_code(connection,ProtocolCodes.REFUSE_CALL)
+        send_code(connection, ProtocolCodes.REFUSE_CALL)
 
-def get_connection_accept_input(address : str):
+
+def get_connection_accept_input(address: str):
     if accept_request_method is not None:
         return accept_request_method(address)
     return True
 
 
 def accept_call(socket: socket.socket):
-    start_listing_to_stream()
+    start_listening_to_stream()
     send_code(socket, ProtocolCodes.ACCEPT_CALL)
     code = recv_code(socket)
     if code == ProtocolCodes.STARTED_STREAMING:
@@ -205,13 +201,12 @@ def connect_with(address: str, port: int):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((address, port))
-        start_listing_to_stream()
+        start_listening_to_stream()
         send_code(s, ProtocolCodes.REQUEST_CALL)
         answer = recv_code(s)
         if answer == ProtocolCodes.ACCEPT_CALL:
             start_streaming(address)
             send_code(s, ProtocolCodes.STARTED_STREAMING)
-            return (video_streamer, audio_listener)
         else:
             stop_call()
     except:
@@ -219,11 +214,12 @@ def connect_with(address: str, port: int):
         stop_call()
 
 
-def update_request_method(new_method: Callable):
+def update_request_method(new_method: callable):
     global accept_request_method
     accept_request_method = new_method
 
-def quit():
+
+def quit_client():
     global listener_thread, streamer_thread, request_thread, is_running
     stop_call()
     is_running = False

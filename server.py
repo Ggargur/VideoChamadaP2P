@@ -10,7 +10,6 @@ HOST = "0.0.0.0"
 PORT = SERVER_PORT
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# clients: dict[str, tuple[socket.socket, socket.AddressInfo]] = {}
 
 clients_name_to_address: dict[str, tuple[str, int]] = {}
 

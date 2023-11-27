@@ -2,7 +2,6 @@
 This module implements the main functionality of vidstream.
 
 Author: Florian Dedov from NeuralNine
-YouTube: BOSTAS
 """
 
 __author__ = "Florian Dedov, NeuralNine"
@@ -78,7 +77,6 @@ class StreamingServer:
         quit_key : chr
             key that has to be pressed to close connection (default = 'q')  
         """
-        self.main_frame = None
         self.__host = host
         self.__port = port
         self.__slots = slots
