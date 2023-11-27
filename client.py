@@ -116,10 +116,10 @@ def get_all_registered_names():
 
 def start_listener_server():
     global audio_listener, streaming_server
-    # audio_listener = audio.AudioReceiver("0.0.0.0", 6666)
+    audio_listener = audio.AudioReceiver("0.0.0.0", 6666)
     streaming_server = streaming.StreamingServer("0.0.0.0", 9999)
 
-    # audio_listener.start_server()
+    audio_listener.start_server()
     streaming_server.start_server()
 
 
@@ -138,9 +138,9 @@ def start_listening_to_requests(socket: socket.socket):
 def start_streaming_server(address: str):
     global video_streamer, audio_streamer
     video_streamer = streaming.CameraClient(address, 9999)
-    # audio_streamer = audio.AudioSender("0.0.0.0", 6666)
+    audio_streamer = audio.AudioSender("0.0.0.0", 6666)
 
-    # audio_streamer.start_stream()
+    audio_streamer.start_stream()
     video_streamer.start_stream()
 
 

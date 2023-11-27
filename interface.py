@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from client import quit_client
 from client import (
     request_name,
     unregister_name,
@@ -9,6 +8,7 @@ from client import (
     get_all_registered_names,
     connect_with,
     update_request_method,
+    quit_client
 )
 
 

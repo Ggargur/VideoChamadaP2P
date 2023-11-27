@@ -11,11 +11,13 @@ __status__ = "planning"
 import cv2
 import pyautogui
 import numpy as np
-
 import socket
 import pickle
 import struct
 import threading
+import tkinter as tk
+from tkinter import ttk
+from PIL import Image, ImageTk
 
 
 class StreamingServer:
@@ -394,6 +396,35 @@ class CameraClient(StreamingClient):
         """
         self.__camera.release()
         cv2.destroyAllWindows()
+
+    def __client_streaming(self):
+        self.__client_socket.connect((self.__host, self.__port))
+        root = tk.Tk()
+        app = tk.Frame(root, bg ='white')
+        app.grid()
+        lmain = tk.Label(app)
+        lmain.grid()
+        while self.__running:
+            frame = self._get_frame()
+            cv2_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            img = Image.fromarray(cv2_frame)
+            imgtk = ImageTk.PhotoImage(image=img)
+            lmain.imgtk = imgtk
+            lmain.configure(image=imgtk)
+            result, frame = cv2.imencode('.jpg', frame, self.__encoding_parameters)
+            data = pickle.dumps(frame, 0)
+            size = len(data)
+            root.mainloop()
+            try:
+                self.__client_socket.sendall(struct.pack('>L', size) + data)
+            except ConnectionResetError:
+                self.__running = False
+            except ConnectionAbortedError:
+                self.__running = False
+            except BrokenPipeError:
+                self.__running = False
+
+        self._cleanup()
 
 
 class VideoClient(StreamingClient):
