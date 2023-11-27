@@ -145,7 +145,7 @@ def start_streaming():
 
 def start_listening_to_requests(socket: socket.socket):
     global request_thread
-    request_thread = threading.Thread(target=lambda: listen_to_requests(socket))
+    request_thread = threading.Thread(target=listen_to_requests, args=(socket,), daemon=True)
     request_thread.start()
 
 def stop_call():
