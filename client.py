@@ -98,6 +98,7 @@ def request_name(user_name: str) -> tuple[str, int]:
     return (host, port)
 
 
+# retorna todos os nomes que um dado usuario cadastrou, ou seja, todos pertencentes a um mesmo ip
 def get_all_registered_names():
     server_conn = connect_server()
 
@@ -114,6 +115,9 @@ def get_all_registered_names():
     print(names)
     return names
 
+
+# inicializa as variaveis  para audio e video do stream, permitindo o fluxo que informacoes que sera enviado pelo
+# outro usuario
 def start_listener_server():
     global audio_listener, streaming_server
     audio_listener = audio.AudioReceiver("0.0.0.0", 6666)
@@ -123,12 +127,14 @@ def start_listener_server():
     streaming_server.start_server()
 
 
+#coloca o metodo de start_listener_server em uma thread
 def start_listening_to_stream():
     global listener_thread
     listener_thread = threading.Thread(target=start_listener_server)
     listener_thread.start()
 
 
+#adiciona o metodo listen_to_request em uma thread
 def start_listening_to_requests(socket: socket.socket):
     global request_thread
     request_thread = threading.Thread(target=listen_to_requests, args=(socket,), daemon=True)
@@ -150,6 +156,8 @@ def start_streaming(address: str):
     streamer_thread.start()
 
 
+#finaliza as variaveis envolvidas no streaming de audio e video
+# verificando se cada uma destas foram incializadas para enfim parar com a execucao de todas
 def stop_call():
     global video_streamer, audio_streamer, streaming_server, audio_listener
     if video_streamer is not None:
@@ -166,6 +174,7 @@ def stop_call():
         streaming_server = None
 
 
+#metodo que permite um cliente "escutar" por requisicoes de videoconferencia
 def listen_to_requests(socket: socket.socket):
     global accept_request_method, is_running
     while is_running:
@@ -219,6 +228,7 @@ def update_request_method(new_method: callable):
     accept_request_method = new_method
 
 
+#incia processo de fim de uma chamada
 def quit_client():
     global listener_thread, streamer_thread, request_thread, is_running
     stop_call()

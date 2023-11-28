@@ -153,15 +153,14 @@ class Page1(tk.Frame):
             else:
                 btn.destroy()
 
-    def connect_with(self, host, port, b):
+    # inicia a conexao entre dois usuarios por meio metodo connect_with, proveniente do arquivo client.py
+    def connect_with(self, host, port):
         connect_with(host, port)
-        b['text'] = 'Sair da call'
-        b['command'] = lambda: self.close_call(b)
 
-    def close_call(self, b):
-        stop_call()
-        b.destroy()
-
+    # busca por um usuario por meio de um nome cadastrado no servidor. Caso o campo esteja vazio ou valor da porta seja
+    # menor que zero recebera uma mensagem indicado que o usuario nao foi encontrado, aso contrario, recebera
+    # uma mensagem indicando o seu ip e a porta dispniveis para conexao. Em seguida um botao e criado na interface do
+    # aplicativo que permite o inicio da chamada, caso o outro usuario aceite
     def request_name(self, entry: ttk.Entry):
         name = entry.get()
         if name == "":
@@ -175,16 +174,14 @@ class Page1(tk.Frame):
         else:
             messagebox.showinfo("Usuário Encontrado", f"Usuário {name} encontrado em {host}:{port}")
         b = ttk.Button(self.second_tab, width=50, text=f"Conectar-se a {name}")
-        b['command'] = lambda: self.connect_with(host, port, b)
+        b['command'] = lambda: self.connect_with(host, port)
         b.pack(padx=4, pady=4)
 
+    #mensagem enviada para um usuario que recebe um pedido de videoconferencia
     def accept_request(self, adress: str):
         return messagebox.askyesno(
             "Aviso", f"Você está sendo chamado(a) por {adress}, deseja aceitar?"
         )
-        b = ttk.Button(self.second_tab, width=50)
-        b['text'] = 'Sair da call'
-        b['command'] = lambda: self.close_call(b)
 
     # Cria botoes em Page1 que permitem ao usuario voltar para StartPage ou sair do aplicativo
     def create_buttons(self):

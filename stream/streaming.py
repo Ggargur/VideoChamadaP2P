@@ -15,9 +15,6 @@ import socket
 import pickle
 import struct
 import threading
-import tkinter as tk
-from tkinter import ttk
-from PIL import Image, ImageTk
 
 
 class StreamingServer:
