@@ -138,7 +138,7 @@ def start_listening_to_requests(socket: socket.socket):
 def start_streaming_server(address: str):
     global video_streamer, audio_streamer
     video_streamer = streaming.CameraClient(address, 9999)
-    audio_streamer = audio.AudioSender("0.0.0.0", 6666)
+    audio_streamer = audio.AudioSender(address, 6666)
 
     audio_streamer.start_stream()
     video_streamer.start_stream()

@@ -8,7 +8,8 @@ from client import (
     get_all_registered_names,
     connect_with,
     update_request_method,
-    quit_client
+    quit_client,
+    stop_call
 )
 
 
@@ -152,6 +153,15 @@ class Page1(tk.Frame):
             else:
                 btn.destroy()
 
+    def connect_with(self, host, port, b):
+        connect_with(host, port)
+        b['text'] = 'Sair da call'
+        b['command'] = lambda: self.close_call(b)
+
+    def close_call(self, b):
+        stop_call()
+        b.destroy()
+
     def request_name(self, entry: ttk.Entry):
         name = entry.get()
         if name == "":
@@ -165,13 +175,16 @@ class Page1(tk.Frame):
         else:
             messagebox.showinfo("Usuário Encontrado", f"Usuário {name} encontrado em {host}:{port}")
         b = ttk.Button(self.second_tab, width=50, text=f"Conectar-se a {name}")
-        b['command'] = call_with_args(connect_with, host, port)
+        b['command'] = lambda: self.connect_with(host, port, b)
         b.pack(padx=4, pady=4)
 
-    def accept_request(self, adress: str) -> bool:
+    def accept_request(self, adress: str):
         return messagebox.askyesno(
             "Aviso", f"Você está sendo chamado(a) por {adress}, deseja aceitar?"
         )
+        b = ttk.Button(self.second_tab, width=50)
+        b['text'] = 'Sair da call'
+        b['command'] = lambda: self.close_call(b)
 
     # Cria botoes em Page1 que permitem ao usuario voltar para StartPage ou sair do aplicativo
     def create_buttons(self):
