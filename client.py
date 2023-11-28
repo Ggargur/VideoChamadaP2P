@@ -98,7 +98,7 @@ def request_name(user_name: str) -> tuple[str, int]:
     return (host, port)
 
 
-# retorna todos os nomes que um dado usuario cadastrou, ou seja, todos pertencentes a um mesmo ip
+# Retorna todos os nomes que um dado usuario cadastrou, ou seja, todos pertencentes a um mesmo ip.
 def get_all_registered_names():
     server_conn = connect_server()
 
@@ -116,8 +116,8 @@ def get_all_registered_names():
     return names
 
 
-# inicializa as variaveis  para audio e video do stream, permitindo o fluxo que informacoes que sera enviado pelo
-# outro usuario
+# Inicializa as variaveis para envio de audio e video do stream, permitindo o fluxo que informacoes que sera enviado pelo
+# outro usuario.
 def start_listener_server():
     global audio_listener, streaming_server
     audio_listener = audio.AudioReceiver("0.0.0.0", 6666)
@@ -127,20 +127,21 @@ def start_listener_server():
     streaming_server.start_server()
 
 
-#coloca o metodo de start_listener_server em uma thread
+# Coloca o inicia os métodos de ouvir a chamada em uma nova thread.
 def start_listening_to_stream():
     global listener_thread
     listener_thread = threading.Thread(target=start_listener_server)
     listener_thread.start()
 
 
-#adiciona o metodo listen_to_request em uma thread
+# Coloca o inicia os métodos de ouvir por requisições de novas chamadas.
 def start_listening_to_requests(socket: socket.socket):
     global request_thread
     request_thread = threading.Thread(target=listen_to_requests, args=(socket,), daemon=True)
     request_thread.start()
 
-
+# Inicializa as variaveis para recebimento de audio e video do stream, permitindo o fluxo que informacoes que sera enviado pelo
+# outro usuario.
 def start_streaming_server(address: str):
     global video_streamer, audio_streamer
     video_streamer = streaming.CameraClient(address, 9999)
@@ -149,15 +150,15 @@ def start_streaming_server(address: str):
     audio_streamer.start_stream()
     video_streamer.start_stream()
 
-
+# Coloca o inicia os métodos de enviar vídeo e audio para uma chamada em uma nova thread.
 def start_streaming(address: str):
     global streamer_thread
     streamer_thread = threading.Thread(target=start_streaming_server, args=(address,))
     streamer_thread.start()
 
 
-#finaliza as variaveis envolvidas no streaming de audio e video
-# verificando se cada uma destas foram incializadas para enfim parar com a execucao de todas
+# Finaliza as variaveis envolvidas no streaming de audio e video
+# verificando se cada uma destas foram incializadas para enfim parar com a execucao de todas.
 def stop_call():
     global video_streamer, audio_streamer, streaming_server, audio_listener
     if video_streamer is not None:
@@ -174,7 +175,7 @@ def stop_call():
         streaming_server = None
 
 
-#metodo que permite um cliente "escutar" por requisicoes de videoconferencia
+# Metodo que permite um cliente "escutar" por requisicoes de videoconferencia.
 def listen_to_requests(socket: socket.socket):
     global accept_request_method, is_running
     while is_running:
@@ -183,7 +184,7 @@ def listen_to_requests(socket: socket.socket):
         if (code == ProtocolCodes.REQUEST_CALL):
             handle_connection_request(connection, address_conection)
 
-
+# Começa uma chamada caso o usuário aceite conectar-se, caso contrário envia um sinal de conexão não aceita.
 def handle_connection_request(connection: socket.socket, address: str):
     print("Me foi requesitada uma chamada.")
     if get_connection_accept_input(address):
@@ -191,13 +192,13 @@ def handle_connection_request(connection: socket.socket, address: str):
     else:
         send_code(connection, ProtocolCodes.REFUSE_CALL)
 
-
+# Pega o resultado do input do usuário quando ele é requisitado para saber se deseja aceitar uma chamada.
 def get_connection_accept_input(address: str):
     if accept_request_method is not None:
         return accept_request_method(address)
     return True
 
-
+# Aceita uma conexão de chamada com um usuário.
 def accept_call(socket: socket.socket):
     start_listening_to_stream()
     send_code(socket, ProtocolCodes.ACCEPT_CALL)
@@ -205,7 +206,7 @@ def accept_call(socket: socket.socket):
     if code == ProtocolCodes.STARTED_STREAMING:
         start_streaming(socket.getpeername()[0])
 
-
+# Tenta conectar-se com um novo usuário para começar uma chamada.
 def connect_with(address: str, port: int):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -222,13 +223,13 @@ def connect_with(address: str, port: int):
         print("Não consegui me conectar com esse usuário.")
         stop_call()
 
-
+# Altera o método que pede para o usuário se ele deseja aceitar uma nova conexão.
 def update_request_method(new_method: callable):
     global accept_request_method
     accept_request_method = new_method
 
 
-#incia processo de fim de uma chamada
+# incia processo de fim de uma chamada.
 def quit_client():
     global listener_thread, streamer_thread, request_thread, is_running
     stop_call()
